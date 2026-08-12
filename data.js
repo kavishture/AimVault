@@ -22,16 +22,16 @@
 
 const crosshairs = [
   {
-    name: "TenZ",
-    type: "Pro",
-    team: "Sentinels",
-    role: "Duelist",
-    avatar: "https://placehold.co/192x192/1D212B/FF4655?text=TZ",
-    code: "0;P;d;1;f;0;0t;4;0l;1;0o;0;0a;1;0f;0;1b;0",
+    name: "Tarik",
+    type: "Professional",
+    team: "",
+    role: "",
+    avatar: "https://cdn.phototourl.com/free/2026-08-12-0ff50141-ad03-4127-a70f-f4fa06582942.png",
+    code: "0;P;o;1;d;1;0b;0;1b;0",
     sensitivity: "0.348",
-    dpi: "800",
-    edpi: "278",
-    description: "A clean cyan cross with a small dot center, favored for its visibility across most Valorant maps.",
+    dpi: "",
+    edpi: "",
+    description: "A clean wihite cross with a small dot center, favored for its visibility across most Valorant maps.",
     previewColor: "#4FD8E8",
     dot: true, dotSize: 2, lineLength: 8, lineThickness: 2, gap: 3, outline: true
   },
