@@ -37,8 +37,11 @@
   nav.links{ display:flex; gap:26px; font-size:14px; color:var(--muted); align-items:center; }
   nav.links a:hover{ color:var(--text); }
   nav.links a.active{ color:var(--accent); }
+  .header-right{ display:flex; align-items:center; gap:10px; }
   .req-btn{ background:var(--accent); color:#fff; font-weight:700; font-size:13.5px; padding:9px 16px; border-radius:8px; }
   .req-btn:hover{ filter:brightness(1.1); }
+  .add-btn{ background:transparent; color:var(--text); font-weight:700; font-size:13.5px; padding:9px 16px; border-radius:8px; border:1px solid var(--line); }
+  .add-btn:hover{ border-color:var(--mint); color:var(--mint); }
   @media (max-width:820px){ nav.links{ display:none; } }
 
   .filterbar{ background:var(--surface-2); border-bottom:1px solid var(--line); padding:14px 24px; }
@@ -69,7 +72,7 @@
   .section-head .count{ font-family:'JetBrains Mono', monospace; font-size:13px; color:var(--muted); }
 
   .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:16px; }
-  .card{ background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden; transition:transform .15s ease, border-color .15s ease; }
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden; transition:transform .15s ease, border-color .15s ease; position:relative; }
   .card:hover{ transform:translateY(-3px); border-color:rgba(255,70,85,0.5); }
 
   .thumb{
@@ -86,12 +89,29 @@
     padding:3px 7px; border-radius:5px; background:rgba(15,17,21,0.55); color:var(--text);
     letter-spacing:0.04em; backdrop-filter:blur(2px);
   }
+  .thumb .custom-tag{
+    position:absolute; top:8px; left:8px;
+    font-family:'JetBrains Mono', monospace; font-size:9.5px; font-weight:600;
+    padding:3px 7px; border-radius:5px; background:rgba(93,214,179,0.85); color:#0F1115;
+    letter-spacing:0.04em;
+  }
 
   .card-foot{ padding:12px 14px 14px; text-align:center; }
   .card-name{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:14.5px; }
   .card-sub{ font-size:11.5px; color:var(--muted); margin-top:3px; }
 
   .empty{ text-align:center; padding:60px 20px; color:var(--muted); font-size:14px; grid-column:1/-1; }
+  .empty a{ color:var(--accent); }
+
+  /* Add-crosshair promo card, sits inline with the grid */
+  .add-card{
+    border:1px dashed var(--line); border-radius:12px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:8px; padding:20px; text-align:center;
+    color:var(--muted); transition:border-color .15s ease, color .15s ease; min-height:100%;
+  }
+  .add-card:hover{ border-color:var(--mint); color:var(--mint); }
+  .add-card .plus{ width:34px; height:34px; border-radius:50%; border:1px solid currentColor; display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .add-card .add-label{ font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:13.5px; }
 
   .request{ background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:40px; display:grid; grid-template-columns:1fr 1fr; gap:36px; }
   @media (max-width:760px){ .request{ grid-template-columns:1fr; padding:26px; } }
@@ -123,9 +143,11 @@
     <nav class="links">
       <a href="#top" class="active">Crosshairs</a>
       <a href="#popular">Trending</a>
+      <a href="add.html">Add a code</a>
       <a href="#request">Request</a>
     </nav>
     <div class="header-right">
+      <a class="add-btn" href="add.html">+ Add code</a>
       <a class="req-btn" href="#request">Request code</a>
     </div>
   </div>
@@ -182,7 +204,7 @@
     <div class="request">
       <div>
         <h2>Can't find a code?</h2>
-        <p>Tell us the player or creator, and if you have it, a link to where you saw their crosshair. We'll review it and add it.</p>
+        <p>Tell us the player or creator, and if you have it, a link to where you saw their crosshair. We'll review it and add it. Or, if you already have the name, code, and an image, you can <a href="add.html" style="color:var(--mint);">add it yourself</a> right now.</p>
         <div class="request-note">Requests are reviewed manually before a code is listed — this keeps the catalog trustworthy.</div>
       </div>
       <form class="request-form" id="requestForm">
@@ -213,7 +235,9 @@ let sortMode = "newest";
 
 function renderCrosshairs(){
   const grid = document.getElementById("crosshairGrid");
-  let filtered = crosshairs.filter(c => {
+  const all = getAllCrosshairs();
+
+  let filtered = all.filter(c => {
     const matchesCategory = activeCategory === "all" || c.type === activeCategory;
     const q = query.trim().toLowerCase();
     const matchesQuery = !q ||
@@ -224,21 +248,33 @@ function renderCrosshairs(){
 
   if(sortMode === "az"){
     filtered = filtered.slice().sort((a, b) => a.name.localeCompare(b.name));
+  } else {
+    // newest first: custom entries (which carry a timestamp-based id) bubble up
+    filtered = filtered.slice().reverse();
   }
 
   document.getElementById("resultCount").textContent = filtered.length + " result" + (filtered.length === 1 ? "" : "s");
 
+  const addCardHtml = `
+    <a href="add.html">
+      <div class="add-card">
+        <div class="plus">+</div>
+        <div class="add-label">Add a crosshair</div>
+      </div>
+    </a>`;
+
   if(filtered.length === 0){
-    grid.innerHTML = '<div class="empty">No crosshairs match that search — try another term or <a href="#request" style="color:var(--accent)">request it</a>.</div>';
+    grid.innerHTML = '<div class="empty">No crosshairs match that search — try another term, <a href="add.html">add it yourself</a>, or <a href="#request">request it</a>.</div>' + addCardHtml;
     return;
   }
 
   grid.innerHTML = filtered.map(c => `
-    <a href="detail.html?id=${c.id}">
+    <a href="detail.html?id=${encodeURIComponent(c.id)}">
       <div class="card">
         <div class="thumb">
-          ${renderCrosshairSVG(c, 140)}
+          ${renderThumb(c, 140)}
           <span class="game-tag">${c.type}</span>
+          ${c.custom ? '<span class="custom-tag">Added by you</span>' : ''}
         </div>
         <div class="card-foot">
           <div class="card-name">${c.name}</div>
@@ -246,7 +282,7 @@ function renderCrosshairs(){
         </div>
       </div>
     </a>
-  `).join("");
+  `).join("") + addCardHtml;
 }
 
 document.getElementById("searchInput").addEventListener("input", e => { query = e.target.value; renderCrosshairs(); });
