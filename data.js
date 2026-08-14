@@ -8,7 +8,127 @@
                     — controls the Show: filter tabs
    - team          (optional) e.g. "Sentinels"
    - role          (optional) e.g. "Duelist"
-   - avatar        (required) image URL for the player/creator
+   - avatar        (required) image URL for the player/creator/* ============================================================
+   AimVault data layer
+   - `crosshairs`  : built-in starter entries (edit freely, or
+                     delete them once you've added your own).
+   - custom entries added through add.html are kept in the
+     browser's localStorage and merged in automatically.
+   ============================================================ */
+
+const crosshairs = [
+  {
+    id: "seed-1",
+    name: "Sample Pro A",
+    team: "Example Esports",
+    type: "Pro",
+    code: "0;P;c;1;h;0;f;0;0l;4;0o;2;0a;1;0f;0;1b;0",
+    color: "#5DD6B3"
+  },
+  {
+    id: "seed-2",
+    name: "Sample Streamer B",
+    team: "Full-time streamer",
+    type: "Streamer",
+    code: "0;s;1;P;c;5;h;0;f;0;0l;3;0o;1;0a;0.8;0f;0",
+    color: "#FF4655"
+  },
+  {
+    id: "seed-3",
+    name: "Sample Community Pick C",
+    team: "Community favorite",
+    type: "Community",
+    code: "0;P;c;7;h;0;f;0;0l;5;0o;3;0a;1;0f;0;1b;0",
+    color: "#F5D76E"
+  }
+];
+
+/* ---------------- placeholder thumbnail renderer ----------------
+   Draws a simple crosshair glyph so every card/detail page has a
+   visual even before a real screenshot/image is attached. If the
+   entry has an `image` field, callers should render that <img>
+   instead of calling this function. */
+function renderCrosshairSVG(c, size){
+  size = size || 140;
+  const color = (c && c.color) || "#5DD6B3";
+  const mid = size / 2;
+  const gap = size * 0.12;
+  const len = size * 0.22;
+  const thick = Math.max(2, size * 0.02);
+  return `
+    <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+      <line x1="${mid - gap - len}" y1="${mid}" x2="${mid - gap}" y2="${mid}" stroke="${color}" stroke-width="${thick}" stroke-linecap="square"/>
+      <line x1="${mid + gap}" y1="${mid}" x2="${mid + gap + len}" y2="${mid}" stroke="${color}" stroke-width="${thick}" stroke-linecap="square"/>
+      <line x1="${mid}" y1="${mid - gap - len}" x2="${mid}" y2="${mid - gap}" stroke="${color}" stroke-width="${thick}" stroke-linecap="square"/>
+      <line x1="${mid}" y1="${mid + gap}" x2="${mid}" y2="${mid + gap + len}" stroke="${color}" stroke-width="${thick}" stroke-linecap="square"/>
+      <circle cx="${mid}" cy="${mid}" r="${thick * 0.9}" fill="${color}"/>
+    </svg>`;
+}
+
+/* Returns the markup for a card/detail thumbnail — a real image
+   if one was attached, otherwise the generated crosshair glyph. */
+function renderThumb(c, size){
+  if(c && c.image){
+    return `<img src="${c.image}" alt="${c.name} crosshair preview" style="width:100%;height:100%;object-fit:cover;">`;
+  }
+  return renderCrosshairSVG(c, size);
+}
+
+/* ---------------- localStorage-backed custom entries ---------------- */
+const CUSTOM_KEY = "aimvault_custom_crosshairs";
+
+function getCustomCrosshairs(){
+  try{
+    const raw = localStorage.getItem(CUSTOM_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){
+    console.error("AimVault: failed to read custom crosshairs", e);
+    return [];
+  }
+}
+
+function saveCustomCrosshairs(list){
+  try{
+    localStorage.setItem(CUSTOM_KEY, JSON.stringify(list));
+    return true;
+  }catch(e){
+    console.error("AimVault: failed to save custom crosshairs", e);
+    return false;
+  }
+}
+
+function getAllCrosshairs(){
+  return crosshairs.concat(getCustomCrosshairs());
+}
+
+function getCrosshairById(id){
+  return getAllCrosshairs().find(c => c.id === id);
+}
+
+function addCrosshair(entry){
+  const list = getCustomCrosshairs();
+  const newEntry = Object.assign({
+    id: "custom-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    custom: true
+  }, entry);
+  list.push(newEntry);
+  saveCustomCrosshairs(list);
+  return newEntry;
+}
+
+function updateCrosshair(id, updates){
+  const list = getCustomCrosshairs();
+  const idx = list.findIndex(c => c.id === id);
+  if(idx === -1) return null;
+  list[idx] = Object.assign({}, list[idx], updates);
+  saveCustomCrosshairs(list);
+  return list[idx];
+}
+
+function deleteCrosshair(id){
+  const list = getCustomCrosshairs().filter(c => c.id !== id);
+  saveCustomCrosshairs(list);
+}
    - banner        (optional) wide cover image for the detail page
    - code          (required) the copyable crosshair code
    - sensitivity / dpi / edpi   (optional stats)
