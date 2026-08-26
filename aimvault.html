@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AimVault — Valorant Crosshair Database</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1222;--card:#172238;--card2:#1d2a40;--line:#2c3c58;--text:#f3f6fb;--muted:#94a3b8;--red:#ff4655}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#101a2d,#09111f);color:var(--text);font:14px Inter,Arial,sans-serif}a{color:inherit;text-decoration:none}button,input,textarea,select{font:inherit}
+header{height:70px;display:flex;align-items:center;gap:28px;padding:0 max(16px,calc((100% - 1160px)/2));background:#131c2bfa;border-bottom:1px solid #26344c;position:sticky;top:0;z-index:10}
+.logo{display:flex;gap:10px;align-items:center;margin-right:auto}.logo i{width:36px;height:36px;background:var(--red);border-radius:10px;display:grid;place-items:center;font-style:normal;font-size:20px;transform:rotate(8deg)}.logo b{display:block}.logo small{font-size:10px;color:var(--muted)}nav{display:flex;gap:22px;color:#dbe2ec}nav a:hover{color:#fff}.btn,.icon{background:#19253a;border:1px solid var(--line);color:#eef2f8;padding:9px 13px;border-radius:10px;cursor:pointer}.primary{background:var(--red);border-color:var(--red);color:white;font-weight:700}.btn:hover{border-color:#627492}
+main{max-width:1160px;margin:auto;padding:34px 16px 70px}.hero{display:flex;justify-content:space-between;gap:20px;align-items:end}.eyebrow{color:var(--red);font-size:11px;font-weight:800;letter-spacing:1.3px}.hero h1{font-size:29px;margin:5px 0}.muted{color:var(--muted)}.actions{display:flex;gap:8px}
+.toolbar{margin:24px 0;display:flex;gap:8px;flex-wrap:wrap;background:#111b2d;border:1px solid var(--line);padding:10px;border-radius:12px}.toolbar>*{height:38px}.toolbar input,.toolbar select,.toolbar button{background:#172238;color:#e8eef7;border:1px solid var(--line);border-radius:9px;padding:0 12px}.toolbar .active{border-color:var(--red);background:#2a1d2b}.grow{flex:1}
+.section{border-top:1px solid #2a374e;padding-top:20px;margin-top:35px}.section h2{margin:4px 0 14px;font-size:22px}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.feature,.card,.panel{background:var(--card);border:1px solid var(--line);border-radius:14px}.feature{padding:12px;display:grid;grid-template-columns:125px 1fr;gap:12px;align-items:center}.feature:hover,.card:hover{border-color:#526681;transform:translateY(-2px)}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.card{padding:10px;cursor:pointer}.card h3{font-size:14px;margin:9px 2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;gap:5px}.badge{display:inline-block;background:#25364e;color:#bdd0e5;padding:4px 7px;border-radius:99px;font-size:9px;font-weight:800;text-transform:uppercase}.community{background:#33212a;color:#ff8b96}
+.preview{height:145px;border-radius:10px;background:linear-gradient(135deg,#969288,#6f6b63);overflow:hidden;position:relative}.large{height:420px}.light{background:linear-gradient(135deg,#e7ebef,#bbc3ce)}.green{background:linear-gradient(135deg,#6e945d,#3d6046)}.preview canvas{width:100%;height:100%;display:block}
+.detail{display:grid;grid-template-columns:1.45fr .8fr;gap:18px}.panel{padding:18px}.gallery{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}.code{font:12px ui-monospace,monospace;background:#0d1727;border:1px solid var(--line);padding:13px;border-radius:10px;word-break:break-all;margin:12px 0}.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.full{grid-column:1/-1}.field label{font-size:12px;color:#b8c5d8}.field input,.field textarea,.field select{background:#0d1727;color:white;border:1px solid var(--line);border-radius:9px;padding:11px}.field textarea{min-height:100px}.form-layout{display:grid;grid-template-columns:1fr 380px;gap:18px}.validation{padding:10px;border-radius:9px;background:#162b3a;border:1px solid #31536b}.bad{background:#2b1c25;border-color:#683440;color:#ff9ca4}
+.empty{padding:45px;text-align:center;border:1px dashed var(--line);border-radius:14px;color:var(--muted);grid-column:1/-1}.pagination{display:flex;justify-content:center;gap:7px;margin:22px}.pagination button{background:#172238;border:1px solid var(--line);color:white;border-radius:8px;padding:8px 11px}.pagination .active{background:var(--red);border-color:var(--red)}
+footer{border-top:1px solid #26344c;color:var(--muted);padding:22px max(16px,calc((100% - 1160px)/2));display:flex;justify-content:space-between;font-size:12px}.toast{position:fixed;right:18px;bottom:18px;background:#17253a;border:1px solid #4b5f7e;padding:12px 15px;border-radius:10px;opacity:0;z-index:50}.toast.on{opacity:1}
+@media(max-width:1050px){.grid{grid-template-columns:repeat(4,1fr)}.detail,.form-layout{grid-template-columns:1fr}.large{height:360px}}
+@media(max-width:700px){header nav{display:none}.hero{display:block}.actions{margin-top:14px}.features{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.toolbar{display:grid;grid-template-columns:1fr 1fr}.grow{display:none}.form{grid-template-columns:1fr}.full{grid-column:auto}.gallery{grid-template-columns:1fr 1fr}footer{display:block}footer div+div{margin-top:7px}}
+</style></head>
+<body>
+<header><a class="logo" href="#/"><i>✦</i><span><b>AIMVAULT</b><small>Valorant Crosshair Database</small></span></a>
+<nav><a href="#/crosshairs">Crosshairs</a><a href="#/generator">Crosshair Generator</a><a href="#/sensitivity">Sensitivity Converter</a><a href="#/tools">Tools</a></nav>
+<button class="btn" onclick="login()">Login</button><button class="icon">◉</button></header>
+<main id="app"></main><footer><div><b>AIMVAULT</b> · Valorant Crosshair Database</div><div>Community powered</div></footer><div id="toast" class="toast"></div>
+
+<script>
+/* Backend intentionally not wired up yet — public/local-only for now (see task notes). */
+function getData(){let x=localStorage.getItem("aimvault-data");return x?JSON.parse(x):seed}
+
+const seed=[
+{id:"nats",name:"nAts",creator:"nAts",code:"0;P;c;1;o;0;0t;1;0l;2;0o;0;0a;1;0f;0;1b;0",type:"curated",copies:771001,created_at:"2022-04-29"},
+{id:"tenz",name:"TenZ",creator:"TenZ",code:"0;s;1;P;c;5;o;0;0t;4;0l;2;0o;0;0a;1;0f;0;1b;0",type:"curated",copies:7200000,created_at:"2024-01-01"},
+{id:"yay",name:"yay",creator:"yay",code:"0;P;c;1;o;0;0t;1;0l;4;0o;2;0a;1;0f;0;1b;0",type:"curated",copies:5800000,created_at:"2024-01-02"},
+{id:"aspas",name:"Aspas",creator:"Aspas",code:"0;P;c;4;o;1;0t;2;0l;2;0o;0;0a;1;0f;0;1b;0",type:"curated",copies:480000,created_at:"2024-02-01"},
+{id:"cryo",name:"Cryo",creator:"Cryo",code:"0;P;c;5;o;1;0t;2;0l;4;0o;1;0a;1;0f;0;1b;0",type:"curated",copies:210000,created_at:"2024-03-01"},
+{id:"sakura",name:"Sakura",creator:"Sakura",code:"0;P;c;6;o;1;0t;1;0l;1;0o;0;0a;1;0f;0;1b;0",type:"curated",copies:82000,created_at:"2024-04-01"},
+{id:"demo1",name:"My Clean Dot",creator:"Kavish",code:"0;s;1;P;c;5;o;0;d;1;z;3;a;1;f;0;0t;0;0l;0;0o;0;0a;1;0f;0;1b;0",type:"community",copies:24,created_at:new Date(Date.now()-1000).toISOString()},
+{id:"demo2",name:"Simple Cyan",creator:"ShadowAim",code:"0;P;c;4;o;1;0t;1;0l;2;0o;0;0a;1;0f;0;1b;0",type:"community",copies:16,created_at:new Date(Date.now()-3600000).toISOString()},
+{id:"demo3",name:"Insane Cross",creator:"AimKing",code:"0;P;c;1;o;1;0t;2;0l;5;0o;2;0a;1;0f;0;1b;0",type:"community",copies:9,created_at:new Date(Date.now()-7200000).toISOString()},
+/* Test crosshairs — cover the distinct rendering paths (dot-only, inner-only, outer, outline, combined). */
+{id:"test-a-dot",name:"[Test] Small White Dot",creator:"AimVault QA",code:"0;P;c;3;d;1;z;2;a;1",type:"community",copies:1,created_at:new Date(Date.now()-10000).toISOString()},
+{id:"test-b-cyan",name:"[Test] Cyan Cross",creator:"AimVault QA",code:"0;P;c;4;0t;2;0l;3;0o;0;0a;1",type:"community",copies:1,created_at:new Date(Date.now()-20000).toISOString()},
+{id:"test-c-green",name:"[Test] Green Cross",creator:"AimVault QA",code:"0;P;c;1;0t;2;0l;4;0o;0;0a;1",type:"community",copies:1,created_at:new Date(Date.now()-30000).toISOString()},
+{id:"test-d-red-outline",name:"[Test] Red Cross + Outline",creator:"AimVault QA",code:"0;P;c;0;o;1;t;2;0t;2;0l;3;0o;0;0a;1",type:"community",copies:1,created_at:new Date(Date.now()-40000).toISOString()},
+{id:"test-e-large-white",name:"[Test] Large White Cross",creator:"AimVault QA",code:"0;P;c;3;0t;3;0l;8;0o;1;0a;1",type:"community",copies:1,created_at:new Date(Date.now()-50000).toISOString()},
+{id:"test-f-inner-outer",name:"[Test] Inner + Outer Lines",creator:"AimVault QA",code:"0;P;c;5;0t;2;0l;3;0o;1;0a;1;1t;1;1l;4;1o;1;1a;1",type:"community",copies:1,created_at:new Date(Date.now()-60000).toISOString()},
+{id:"test-g-dot-lines",name:"[Test] Dot + Lines",creator:"AimVault QA",code:"0;P;c;6;d;1;z;2;a;1;0t;2;0l;3;0o;2;0a;1",type:"community",copies:1,created_at:new Date(Date.now()-70000).toISOString()}
+];
+
+const palette={0:"#ff4655",1:"#65e6a8",2:"#f7d64b",3:"#fff",4:"#55e9f4",5:"#59a8ff",6:"#ff76d8"};
+
+/*
+ * Real Valorant crosshair codes are NOT a plain "key;value;key;value;..." list.
+ * A few keys — most notably "P" (marks the block that follows as the primary
+ * profile) — appear on their own with no paired value. Treating every token as
+ * half of a pair (as the previous parser did) shifts every key/value after the
+ * first "P" by one slot, so keys like "0l" (inner length) or "d" (dot on) never
+ * actually get read — everything silently falls back to 0/off and nothing is
+ * ever drawn. This tokenizer walks the string and only consumes a value for
+ * keys that actually carry one.
+ */
+const FLAG_ONLY_KEYS = new Set(["P"]); // keys known to appear with no value attached
+
+function parseCode(code){
+  let raw = String(code || "").trim();
+  if (!raw) return { valid:false, error:"Please enter a crosshair code." };
+  let p = raw.split(";");
+  if (!p[0] || p[0] !== "0") return { valid:false, error:"Invalid Valorant crosshair code." };
+
+  let s = {};
+  let i = 1;
+  while (i < p.length) {
+    let key = p[i];
+    if (key === undefined || key === "") { i++; continue; }
+    if (FLAG_ONLY_KEYS.has(key)) { s[key] = "1"; i += 1; continue; }
+    s[key] = p[i + 1] !== undefined ? p[i + 1] : "";
+    i += 2;
+  }
+
+  const n = (k, d = 0) => (s[k] !== undefined && Number.isFinite(+s[k])) ? +s[k] : d;
+
+  return {
+    valid: true,
+    raw: code,
+    s,
+    color: palette[n("c", 3)] || (s.u ? "#" + String(s.u).replace(/^#/, "") : "#fff"),
+    outline: { on: n("o", 0) > 0, opacity: n("o", 0), thick: Math.max(1, n("t", 1)) },
+    dot:     { on: s.d === "1" || s.z === "1", opacity: n("a", 1), thick: Math.max(1, n("z", n("f", 1))) },
+    inner:   { op: n("0a", 1), len: Math.max(0, n("0l", 0)), thick: Math.max(1, n("0t", 1)), off: n("0o", 0) },
+    outer:   { op: n("1a", 0), len: Math.max(0, n("1l", 0)), thick: Math.max(1, n("1t", 1)), off: n("1o", 0) }
+  };
+}
+
+function draw(c,p){
+  if(!c || !p || !p.valid) return;
+  let r=c.getBoundingClientRect(), d=window.devicePixelRatio||1;
+  let w=Math.max(80,Math.round(r.width)), h=Math.max(80,Math.round(r.height));
+  c.width=w*d; c.height=h*d;
+  let x=c.getContext("2d");
+  x.setTransform(d,0,0,d,0,0);
+  x.clearRect(0,0,w,h);
+  let cx=w/2, cy=h/2, sc=Math.min(w,h)/110;
+  const line=(a,b,c2,d2,op,t)=>{
+    x.lineCap="butt";
+    if(p.outline.on){x.strokeStyle="#000";x.globalAlpha=p.outline.opacity;x.lineWidth=Math.max(1,t*sc*.75+p.outline.thick*sc*.6);x.beginPath();x.moveTo(a,b);x.lineTo(c2,d2);x.stroke()}
+    x.strokeStyle=p.color;x.globalAlpha=Math.max(0,Math.min(1,op));x.lineWidth=Math.max(.7,t*sc*.75);x.beginPath();x.moveTo(a,b);x.lineTo(c2,d2);x.stroke()
+  };
+  let I=p.inner,O=p.outer;
+  if(I.len){let L=I.len*sc,T=I.thick,of=I.off*sc;line(cx,cy-of-L,cx,cy-of,I.op,T);line(cx,cy+of,cx,cy+of+L,I.op,T);line(cx-of-L,cy,cx-of,cy,I.op,T);line(cx+of,cy,cx+of+L,cy,I.op,T)}
+  if(O.len){let L=O.len*sc,T=O.thick,of=(I.len+I.off+O.off)*sc;line(cx,cy-of-L,cx,cy-of,O.op,T);line(cx,cy+of,cx,cy+of+L,O.op,T);line(cx-of-L,cy,cx-of,cy,O.op,T);line(cx+of,cy,cx+of+L,cy,O.op,T)}
+  if(p.dot.on){x.globalAlpha=p.dot.opacity;x.fillStyle=p.color;let z=Math.max(1,p.dot.thick*sc*.55);x.fillRect(cx-z/2,cy-z/2,z,z)}
+  x.globalAlpha=1;
+}
+
+// Registry of "canvas id -> code" pairs waiting to be rendered once they're in the DOM.
+let __avPending = [];
+let __avIdSeq = 0;
+function preview(code,cls="preview"){
+  let id="cx"+(++__avIdSeq);
+  __avPending.push({id,code});
+  return `<div class="${cls}"><canvas id="${id}"></canvas></div>`;
+}
+// Flush every pending preview after the HTML containing it has actually been
+// inserted into the DOM (requestAnimationFrame guarantees layout has run, so
+// canvases have a real, non-zero width/height to measure).
+function flushPreviews(){
+  let batch = __avPending; __avPending = [];
+  if(!batch.length) return;
+  requestAnimationFrame(()=>{
+    for(const {id,code} of batch){
+      let el = document.getElementById(id);
+      if(!el) continue; // card was re-rendered/removed before this ran — safe to skip
+      let p = parseCode(code);
+      if(p.valid) draw(el, p);
+    }
+  });
+}
+// Re-draw all visible previews on resize (canvas pixel size is derived from
+// its CSS box, so it needs to be recomputed when the layout changes).
+addEventListener("resize", ()=>{
+  document.querySelectorAll(".preview canvas, .large canvas").forEach(c=>{
+    // We don't keep a permanent id->code map for every rendered canvas, so on
+    // resize we simply re-run the current route, which rebuilds + redraws everything.
+  });
+});
+addEventListener("resize", ()=>{ if(location.hash) route(); });
+
+async function all(){return getData()}
+async function save(x){await new Promise(r=>{localStorage.setItem("aimvault-data",JSON.stringify(x));r()})}
+async function add(item){let x=await all(),n={...item,id:"local-"+Date.now(),copies:0,created_at:new Date().toISOString()};x.unshift(n);await save(x);return n}
+async function copyCount(id){let x=await all(),i=x.findIndex(a=>a.id==id);if(i>=0){x[i].copies=(x[i].copies||0)+1;await save(x)}}
+function toast(t){let e=document.getElementById("toast");e.textContent=t;e.classList.add("on");setTimeout(()=>e.classList.remove("on"),1700)}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function fmt(n){return n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(1)+"K":n}
+function card(x){return`<article class="card" onclick="location.hash='#/crosshair/${encodeURIComponent(x.id)}'">${preview(x.code)}<h3>${esc(x.name)}</h3><span class="badge ${x.type==="community"?"community":""}">${x.type}</span><div class="meta"><span>${esc(x.creator)}</span><span>${fmt(x.copies||0)} copies</span></div></article>`}
+function home(x){let top=[...x].filter(a=>a.type==="curated").sort((a,b)=>(b.copies||0)-(a.copies||0)).slice(0,3),recent=[...x].filter(a=>a.type==="community").sort((a,b)=>new Date(b.created_at)-new Date(a.created_at)).slice(0,6);return`<div class="hero"><div><div class="eyebrow">DISCOVER</div><h1>Find your next Valorant crosshair</h1><p class="muted">Explore pro setups, curated AimVault codes and community creations.</p></div><div class="actions"><a class="btn" href="#/crosshairs">Explore</a><a class="btn primary" href="#/add">+ Add Crosshair</a></div></div>
+<div class="toolbar"><button class="active">All</button><button>Teams</button><button>Fun</button><button>Other</button><span class="grow"></span><input id="hs" placeholder="Search..."><button onclick="location.hash='#/crosshairs'">Search</button></div>
+<section class="section"><div class="eyebrow">POPULAR</div><h2>Most Copied</h2><div class="features">${top.map((a,i)=>`<article class="feature" onclick="location.hash='#/crosshair/${a.id}'">${preview(a.code)}<div><span class="badge">#${i+1}</span><h3>${esc(a.name)}</h3><p class="muted">${fmt(a.copies)} copies</p><button class="btn primary">Get crosshair</button></div></article>`).join("")}</div></section>
+<section class="section"><div class="eyebrow">FRESH CODES</div><h2>Recently Added</h2><div class="grid">${recent.length?recent.map(card).join(""):'<div class="empty">No community submissions yet.</div>'}</div></section>
+<section class="section"><div class="eyebrow">DATABASE</div><h2>All Crosshairs</h2><div class="grid">${x.slice(0,6).map(card).join("")}</div></section>`}
+async function list(){let data=await all();app.innerHTML=`<div class="hero"><div><div class="eyebrow">DATABASE</div><h1>All Crosshairs</h1><p class="muted">Curated and community Valorant crosshairs.</p></div><a class="btn primary" href="#/add">+ Add Crosshair</a></div><div class="toolbar"><button class="active filter" data-v="all">All</button><button class="filter" data-v="curated">Curated</button><button class="filter" data-v="community">Community</button><span class="grow"></span><input id="q" placeholder="Search..."><select id="sort"><option value="recent">Recently Added</option><option value="copies">Most Copied</option><option value="az">A-Z</option></select></div><div id="results" class="grid"></div><div id="pages" class="pagination"></div>`;let type="all",q="",sort="recent",page=1;function render(){let a=data.filter(x=>(type==="all"||x.type===type)&&(!q||`${x.name} ${x.creator}`.toLowerCase().includes(q.toLowerCase())));if(sort==="copies")a.sort((u,v)=>(v.copies||0)-(u.copies||0));else if(sort==="az")a.sort((u,v)=>u.name.localeCompare(v.name));else a.sort((u,v)=>new Date(v.created_at)-new Date(u.created_at));let pages=Math.max(1,Math.ceil(a.length/18));page=Math.min(page,pages);document.getElementById("results").innerHTML=a.slice((page-1)*18,page*18).map(card).join("")||'<div class="empty">No crosshairs found.</div>';document.getElementById("pages").innerHTML=Array.from({length:pages},(_,i)=>`<button class="${i+1===page?'active':''}" onclick="this.parentNode.querySelectorAll('button').forEach(x=>x.classList.remove('active'));this.classList.add('active');window._avPage(${i+1})">${i+1}</button>`).join("");window._avPage=n=>{page=n;render()};flushPreviews()}document.querySelectorAll(".filter").forEach(b=>b.onclick=()=>{document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));b.classList.add("active");type=b.dataset.v;page=1;render()});qEl=document.getElementById("q");qEl.oninput=e=>{q=e.target.value;page=1;render()};document.getElementById("sort").onchange=e=>{sort=e.target.value;page=1;render()};render()}
+async function detail(id){let x=(await all()).find(a=>String(a.id)===String(id));if(!x){app.innerHTML='<div class="empty">Crosshair not found.</div>';return}app.innerHTML=`<p class="muted"><a href="#/crosshairs">← All crosshairs</a></p><div class="hero"><div><div class="eyebrow">${x.type==="community"?"COMMUNITY CROSSHAIR":"AIMVAULT CROSSHAIR"}</div><h1>${esc(x.name)}</h1><p class="muted">Submitted by <b>${esc(x.creator)}</b> · ${fmt(x.copies||0)} copies</p></div></div><div class="detail"><section class="panel">${preview(x.code,"preview large")}<div class="gallery">${preview(x.code,"preview")} ${preview(x.code,"preview light")} ${preview(x.code,"preview green")}</div></section><aside class="panel"><span class="badge ${x.type==="community"?"community":""}">${x.type}</span><p class="muted">CROSSHAIR CODE</p><div class="code">${esc(x.code)}</div><button class="btn primary" style="width:100%" id="copy">⧉ Copy Code</button><p class="muted" style="font-size:12px;margin-top:18px">The original Valorant code is the source of truth. The preview is rendered from the parsed code.</p></aside></div>`;document.getElementById("copy").onclick=async()=>{await navigator.clipboard.writeText(x.code);await copyCount(x.id);toast("Crosshair code copied")};flushPreviews()}
+function addPage(){app.innerHTML=`<div class="hero"><div><div class="eyebrow">COMMUNITY</div><h1>Add your crosshair</h1><p class="muted">Submit a code. It appears in Recently Added as a community submission.</p></div></div><div class="form-layout"><form class="panel" id="af"><div class="form"><div class="field"><label>Name</label><input id="name" required placeholder="My Clean Dot"></div><div class="field"><label>Creator</label><input id="creator" required placeholder="Your username"></div><div class="field full"><label>Valorant crosshair code</label><textarea id="code" required placeholder="0;P;c;..."></textarea></div><div class="field"><label>Category</label><select id="cat"><option>Other</option><option>Dot</option><option>Cross</option><option>Circle</option><option>Pro Players</option><option>Fun</option></select></div><div class="field"><label>Description</label><input id="desc" placeholder="Optional"></div><div class="field full"><div id="valid" class="validation">Enter a code to preview it.</div></div><div class="field full"><button class="btn primary">Submit Crosshair</button></div></div></form><aside class="panel"><div class="eyebrow">LIVE PREVIEW</div><h3 id="pn">Your Crosshair</h3><div id="pv">${preview("0;P;c;1;o;0;0t;1;0l;2;0o;0;0a;1;0f;0;1b;0","preview large")}</div></aside></div>`;flushPreviews();let ce=document.getElementById("code");function update(){let p=parseCode(ce.value),v=document.getElementById("valid");if(!ce.value){v.textContent="Enter a code to preview it.";v.className="validation";return}v.textContent=p.valid?"✓ Valid Valorant crosshair":"✕ "+p.error;v.className=p.valid?"validation":"validation bad";if(p.valid){document.getElementById("pv").innerHTML=preview(ce.value,"preview large");flushPreviews()}}ce.oninput=update;document.getElementById("name").oninput=e=>document.getElementById("pn").textContent=e.target.value||"Your Crosshair";document.getElementById("af").onsubmit=async e=>{e.preventDefault();let p=parseCode(ce.value);if(!p.valid){update();return}try{let n=await add({name:document.getElementById("name").value,creator:document.getElementById("creator").value,code:ce.value.trim(),category:document.getElementById("cat").value,description:document.getElementById("desc").value,type:"community",approved:true});toast("Submitted!");location.hash="#/crosshair/"+n.id}catch(err){toast("Save failed — please try again")}}}
+function generator(){let code="0;P;c;1;o;0;0t;1;0l;2;0o;0;0a;1;0f;0;1b;0";app.innerHTML=`<div class="hero"><div><div class="eyebrow">BUILDER</div><h1>Crosshair Generator</h1><p class="muted">Edit a code and preview it live.</p></div></div><div class="form-layout"><section class="panel"><div class="form"><div class="field full"><label>Valorant code</label><textarea id="gc">${code}</textarea></div><div class="field"><label>Color</label><select id="col"><option value="0">Red</option><option value="1">Green</option><option value="2">Yellow</option><option value="3">White</option><option value="4">Cyan</option><option value="5">Blue</option><option value="6">Pink</option></select></div><div class="field"><label>Inner length</label><input id="len" type="number" value="2"></div><div class="field"><label>Inner thickness</label><input id="th" type="number" value="1"></div><div class="field"><label>Inner offset</label><input id="off" type="number" value="0"></div><div class="field"><label>Center dot</label><select id="dot"><option value="0">Off</option><option value="1">On</option></select></div><div class="field full"><button class="btn primary" id="apply">Apply settings</button> <button class="btn" id="gcCopy">Copy Code</button></div></div></section><aside class="panel"><div class="eyebrow">LIVE PREVIEW</div><div id="gp">${preview(code,"preview large")}</div></aside></div>`;flushPreviews();document.getElementById("gc").oninput=e=>{let p=parseCode(e.target.value);if(p.valid){document.getElementById("gp").innerHTML=preview(e.target.value,"preview large");flushPreviews()}};document.getElementById("apply").onclick=()=>{code=`0;P;c;${col.value};o;0;d;${dot.value};z;2;a;1;0t;${th.value};0l;${len.value};0o;${off.value};0a;1;0f;0;1b;0`;document.getElementById("gc").value=code;document.getElementById("gp").innerHTML=preview(code,"preview large");flushPreviews()};document.getElementById("gcCopy").onclick=()=>navigator.clipboard.writeText(document.getElementById("gc").value).then(()=>toast("Code copied"))}
+function tools(){app.innerHTML=`<div class="hero"><div><div class="eyebrow">TOOLS</div><h1>AimVault Tools</h1></div></div><div class="features"><div class="panel"><h3>Crosshair Generator</h3><p class="muted">Build a crosshair with a live preview.</p><a class="btn primary" href="#/generator">Open</a></div><div class="panel"><h3>Random Crosshair</h3><p class="muted">Jump to a random AimVault code.</p><button class="btn primary" onclick="random()">Randomize</button></div><div class="panel"><h3>Coming Soon</h3><p class="muted">More aim tools will be added here.</p></div></div>`}
+function sensitivity(){app.innerHTML=`<div class="hero"><div><div class="eyebrow">TOOL</div><h1>Sensitivity Converter</h1><p class="muted">Approximate Valorant → CS2 starting conversion.</p></div></div><div class="panel" style="max-width:600px"><div class="field"><label>Valorant sensitivity</label><input id="s" type="number" value=".5" step=".001"></div><p>CS2 ≈ <b id="so">1.575</b></p></div>`;s.oninput=e=>so.textContent=(+e.target.value*3.15).toFixed(3)}
+async function random(){let x=await all();location.hash="#/crosshair/"+x[Math.floor(Math.random()*x.length)].id}
+function login(){let n=prompt("Username (demo mode):");if(n){localStorage.setItem("aimvault-user",n);toast("Logged in as "+n)}}
+async function route(){let p=(location.hash||"#/").slice(2).split("?")[0],id=p.split("/")[1];if(!p){app.innerHTML=home(await all());flushPreviews()}else if(p==="crosshairs")await list();else if(p==="add")addPage();else if(p==="generator")generator();else if(p==="tools")tools();else if(p==="sensitivity")sensitivity();else if(p.startsWith("crosshair/"))await detail(decodeURIComponent(id));else app.innerHTML='<div class="empty">Page not found.</div>'}
+addEventListener("hashchange",route);route();
+</script></body></html>
