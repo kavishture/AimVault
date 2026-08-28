@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AimVault — Valorant Crosshair Database</title>
+  <meta name="description" content="Discover, preview and copy Valorant crosshairs with AimVault.">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="#home"><img src="logo.svg" alt="AimVault logo"><strong>AIM<span>VAULT</span></strong></a>
+    <nav aria-label="Main navigation">
+      <a href="#home">Home</a><a href="#crosshairs">Crosshairs</a><a href="#recent">Recently Added</a><a href="#popular">Most Copied</a>
+    </nav>
+    <label class="search"><span class="sr-only">Search crosshairs</span><input id="searchInput" type="search" placeholder="Search crosshairs..."></label>
+    <button class="menu" id="menu" aria-label="Open menu">☰</button>
+  </div>
+  <nav class="mobile-nav" id="mobileNav"><a href="#home">Home</a><a href="#crosshairs">Crosshairs</a><a href="#recent">Recently Added</a><a href="#popular">Most Copied</a></nav>
+</header>
+<main>
+<section class="hero" id="home"><div class="wrap hero-inner"><p class="eyebrow">VALORANT CROSSHAIR DATABASE</p><h1>Find your perfect crosshair.</h1><p>Discover, preview and copy Valorant crosshairs from the AimVault collection.</p><a class="button" href="#crosshairs">Browse Crosshairs</a><div class="stats"><div><b id="count">0</b><span>CROSSHAIRS</span></div><div><b id="proCount">0</b><span>PRO STYLES</span></div><div><b id="localCopies">0</b><span>LOCAL COPIES</span></div></div></div></section>
+<section class="section" id="recent"><div class="wrap"><div class="heading"><div><p class="eyebrow">CURATED COLLECTION</p><h2>Recently Added</h2></div></div><div class="grid" id="recentGrid"></div></div></section>
+<section class="section" id="popular"><div class="wrap"><div class="heading"><div><p class="eyebrow">THIS BROWSER</p><h2>Most Copied</h2></div></div><p class="note">Based on your local browser copy history. These are not global statistics.</p><div class="grid" id="popularGrid"></div></div></section>
+<section class="section" id="crosshairs"><div class="wrap"><div class="heading"><div><p class="eyebrow">DATABASE</p><h2>All Crosshairs</h2></div><label class="sort">Sort <select id="sort"><option value="recent">Recently Added</option><option value="name">Name A-Z</option><option value="copied">Most Copied</option></select></label></div><div class="grid" id="allGrid"></div></div></section>
+</main>
+<div class="modal" id="modal" hidden><div class="backdrop" data-close></div><div class="modal-box"><button class="close" data-close>×</button><div class="detail-image" id="detailImage"></div><h2 id="detailName"></h2><pre id="detailCode"></pre><button class="button" id="detailCopy">COPY CODE</button><p class="note" id="detailCount"></p></div></div>
+<script src="crosshairs.js"></script>
+<script src="app.js"></script>
+</body></html>
