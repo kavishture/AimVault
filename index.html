@@ -1,0 +1,119 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>AimVault Crosshair Renderer</title>
+<style>
+body{margin:0;background:#0b1426;color:#eee;font-family:Arial;padding:30px}
+main{max-width:1000px;margin:auto}.grid{display:grid;grid-template-columns:350px 1fr;gap:20px}
+.card{background:#16243a;border:1px solid #30435f;border-radius:14px;padding:18px}
+textarea{width:100%;height:150px;background:#091425;color:white;border:1px solid #40536d;border-radius:8px;padding:10px;font-family:monospace;box-sizing:border-box}
+button{margin-top:10px;padding:10px 15px;border:0;border-radius:8px;background:#ff4655;color:white;font-weight:bold}
+.stage{height:430px;background:#a19d93;border-radius:10px;display:grid;place-items:center}
+#preview{image-rendering:pixelated;image-rendering:crisp-edges}
+.actual{margin-top:12px;background:#0c1728;padding:12px;border-radius:8px}
+#one{width:31px;height:31px;image-rendering:pixelated;image-rendering:crisp-edges;background:#a19d93}
+.ok{color:#63e6a0}.bad{color:#ff808b}
+@media(max-width:750px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<h1>AIMVAULT</h1>
+<p>Pixel-based Valorant-style crosshair preview</p>
+<div class="grid">
+<div class="card">
+<label>Paste Valorant crosshair code</label>
+<textarea id="code">0;s;1;P;c;5;h;0;m;1;0l;4;0o;2;0a;1;0f;0;1b;0</textarea>
+<button onclick="draw()">Render</button>
+<button onclick="preset()">Small cyan</button>
+<p id="status"></p>
+</div>
+<div class="card">
+<h3>Magnified preview</h3>
+<div class="stage"><canvas id="preview"></canvas></div>
+<p>Nearest-neighbor enlargement: no blur and no SVG scaling.</p>
+<div class="actual">
+<b>1:1 actual-size preview</b><br><br>
+<canvas id="one"></canvas>
+</div>
+</div>
+</div>
+</main>
+<script>
+const COLORS=["#fff","#00ff00","#7fff00","#dfff00","#ffff00","#00ffff","#ff00ff","#ff0000"];
+function N(v,d){let n=Number(v);return Number.isFinite(n)?n:d}
+function F(v,d=0){return v==="1"?1:v==="0"?0:d}
+
+function parse(code){
+ if(!code.trim().startsWith("0;"))throw Error("Code must start with 0;");
+ let a=code.trim().split(";").filter(Boolean),P={},section="";
+ for(let i=0;i<a.length;i++){
+  if(a[i]==="P"){section="P";continue}
+  if(a[i]==="A"||a[i]==="S"){section=a[i];continue}
+  if(section==="P"&&i+1<a.length)P[a[i]]=a[++i];
+ }
+ if(!Object.keys(P).length)throw Error("P section not found.");
+ return {
+  color:COLORS[N(P.c,0)]||"#fff",
+  outline:F(P.h),outlineOpacity:N(P.o,1),outlineThickness:N(P.t,1),
+  dot:F(P.d),dotThickness:N(P.z,2),dotOpacity:N(P.a,1),
+  firingOverride:F(P.s),
+  inner:{show:F(P["0b"],1),length:N(P["0l"],6),vertical:N(P["0v"],N(P["0l"],6)),independent:F(P["0g"]),gap:N(P["0o"],3),thick:N(P["0t"],2),opacity:N(P["0a"],1),firing:F(P["0f"])},
+  outer:{show:F(P["1b"]),length:N(P["1l"],6),vertical:N(P["1v"],N(P["1l"],6)),independent:F(P["1g"]),gap:N(P["1o"],10),thick:N(P["1t"],2),opacity:N(P["1a"],1),firing:F(P["1f"])}
+ };
+}
+
+function render(s){
+ const cv=document.createElement("canvas");cv.width=cv.height=161;
+ const c=cv.getContext("2d");c.imageSmoothingEnabled=false;const C=80;
+ function rgba(hex,a){hex=hex.substring(1);return "rgba("+parseInt(hex.substring(0,2),16)+","+parseInt(hex.substring(2,4),16)+","+parseInt(hex.substring(4,6),16)+","+a+")"}
+ function rect(x,y,w,h,col){c.fillStyle=col;c.fillRect(Math.round(C+x),Math.round(C+y),Math.round(w),Math.round(h))}
+ function arm(axis,start,len,t,col){
+  if(len<=0||t<=0)return;
+  if(axis==="h")rect(start,-t/2,len,t,col);else rect(-t/2,start,t,len,col);
+ }
+ function group(g){
+  if(!g.show)return;
+  let gap=g.gap+((!s.firingOverride&&g.firing)?4:0);
+  let col=rgba(s.color,g.opacity);
+  function line(axis,start,len){
+   let t=Math.round(g.thick);
+   if(s.outline){
+    let o=Math.max(1,Math.round(s.outlineThickness));
+    if(axis==="h")rect(start-o,-t/2-o,len+2*o,t+2*o,rgba("#000000",s.outlineOpacity));
+    else rect(-t/2-o,start-o,t+2*o,len+2*o,rgba("#000000",s.outlineOpacity));
+   }
+   arm(axis,start,len,t,col);
+  }
+  let v=g.independent?g.vertical:g.length;
+  line("h",gap,g.length);line("h",-gap-g.length,g.length);
+  line("v",gap,v);line("v",-gap-v,v);
+ }
+ group(s.inner);group(s.outer);
+ if(s.dot){
+  let z=Math.max(1,Math.round(s.dotThickness));
+  if(s.outline)rect(-z/2-s.outlineThickness,-z/2-s.outlineThickness,z+2*s.outlineThickness,z+2*s.outlineThickness,rgba("#000000",s.outlineOpacity));
+  rect(-z/2,-z/2,z,z,rgba(s.color,s.dotOpacity));
+ }
+ return cv;
+}
+
+function draw(){
+ const status=document.getElementById("status");
+ try{
+  let s=parse(document.getElementById("code").value),src=render(s);
+  let big=document.createElement("canvas");big.width=src.width*4;big.height=src.height*4;
+  let bc=big.getContext("2d");bc.imageSmoothingEnabled=false;bc.drawImage(src,0,0,big.width,big.height);
+  let p=document.getElementById("preview"),pc=p.getContext("2d");
+  p.width=big.width;p.height=big.height;p.style.width="360px";p.style.height="360px";pc.imageSmoothingEnabled=false;pc.drawImage(big,0,0);
+  let o=document.getElementById("one"),oc=o.getContext("2d");
+  o.width=src.width;o.height=src.height;o.style.width="31px";o.style.height="31px";oc.imageSmoothingEnabled=false;oc.drawImage(src,0,0);
+  status.className="ok";status.textContent="Rendered successfully.";
+ }catch(e){status.className="bad";status.textContent=e.message}
+}
+function preset(){document.getElementById("code").value="0;s;1;P;c;5;h;0;m;1;0l;4;0o;2;0a;1;0f;0;1b;0";draw()}
+draw();
+</script>
+</body>
+</html>
