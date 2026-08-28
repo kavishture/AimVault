@@ -27,7 +27,7 @@ const crosshairs = [
     team: "Sentinels",
     role: "Duelist",
     avatar: "https://placehold.co/192x192/1D212B/FF4655?text=TZ",
-    code: "0;P;c;1;h;0;f;0;0t;1;0l;2;0o;2;0a;1;0f;0;1b;0",
+    code: "0;s;1;P;o;1;d;1;m;1;0b;0;1b;0",
     sensitivity: "0.348",
     dpi: "800",
     edpi: "278",
