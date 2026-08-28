@@ -7,3 +7,20 @@ const CROSSHAIRS = [
     tags: ["small", "cyan"]
   }
 ];
+const CROSSHAIRS = [
+  {
+    id: "my-crosshair",
+    name: "dot",
+    image: "https://your-image-link.png",
+    code: "YOUR_CODE",
+    tags: ["small", "cyan"]
+  },
+
+  {
+    id: "crosshair-2",
+    name: "Clean White",
+    image: "https://your-second-image-link.png",
+    code: "YOUR_SECOND_CODE",
+    tags: ["small", "white"]
+  }
+];
