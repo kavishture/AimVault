@@ -20,15 +20,18 @@ h1{margin:4px 0;font-size:34px;text-transform:uppercase}header p{max-width:780px
 .bg{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.bg button{width:30px;height:30px;border:2px solid transparent;cursor:pointer}.bg button.active{border-color:var(--red)}
 .field{margin:12px 0}.label{display:flex;justify-content:space-between;font:11px monospace;color:var(--muted);margin-bottom:6px}.val{color:var(--cyan)}
 input[type=range]{width:100%;accent-color:var(--red)}input[type=checkbox]{accent-color:var(--red)}
-.row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);font:12px monospace}.two{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--line);font:12px monospace}.two{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}.dual{display:grid;grid-template-columns:1fr 34px 1fr;gap:8px;align-items:center}.link{height:28px;border:1px solid var(--line);background:#101c26;color:var(--text);cursor:pointer}.link.active{border-color:var(--red);background:#251519}
 .sub{font:11px monospace;letter-spacing:.15em;text-transform:uppercase;color:#647583;border-top:1px solid var(--line);padding-top:12px;margin-top:16px}
-.colors{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.swatch{width:28px;height:28px;border:2px solid transparent;cursor:pointer}.swatch.active{border-color:white}.custom{background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red)}
+.colors{display:none;display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.swatch{width:28px;height:28px;border:2px solid transparent;cursor:pointer}.swatch.active{border-color:white}.custom{background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red)}
 .hex{display:flex;gap:8px;margin-top:8px}.hex input{background:#101c26;color:var(--text);border:1px solid var(--line);padding:8px;font:12px monospace}.hex input[type=color]{width:40px;padding:2px}.hex input[type=text]{flex:1}
 textarea{width:100%;min-height:78px;background:#101c26;color:var(--cyan);border:1px solid var(--line);padding:10px;font:12px monospace;resize:vertical}
 .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}.btn.primary{background:var(--red);color:#180508;border-color:var(--red)}.msg{min-height:18px;color:var(--cyan);font:11px monospace;margin-top:8px}
 .preset{display:flex;gap:10px;align-items:center;border:1px solid var(--line);background:#101c26;padding:9px;margin:6px 0;cursor:pointer}.preset:hover{border-color:#8f2933}.dot{width:10px;height:10px;border-radius:50%}.preset b{flex:1}.preset small{color:var(--muted);font:10px monospace}
 .warn{color:#d9a65f;font:11px monospace;line-height:1.5}
 @media(max-width:980px){.grid{grid-template-columns:1fr}}@media(max-width:600px){.two{grid-template-columns:1fr}.stage{height:360px}h1{font-size:27px}}
+
+.setting-select select{width:100%;background:#101c26;color:var(--text);border:1px solid var(--line);padding:11px;font:12px monospace}
+.seg{display:flex;gap:0;margin-left:auto}.seg button{min-width:78px;border:0;border-left:1px solid var(--line);background:#101c26;color:var(--text);padding:8px 14px;cursor:pointer;font:12px monospace}.seg button.active{background:#59616c;color:#fff}.seg button:first-child{border-left:0}
 </style>
 </head>
 <body>
@@ -68,27 +71,51 @@ textarea{width:100%;min-height:78px;background:#101c26;color:var(--cyan);border:
 <section>
 <div class="panel"><div class="inner" id="controls">
 <div class="title"><span class="tag" id="section">Primary</span><h2>Crosshair Settings</h2></div>
+
+<div class="sub">Profile</div>
 <div class="two">
-<label class="row">Use Advanced ADS <input id="useA" type="checkbox"></label>
-<label class="row">Use Advanced Sniper <input id="useS" type="checkbox"></label>
+<label class="row">Advanced ADS <input id="useA" type="checkbox"></label>
+<label class="row">Advanced Sniper <input id="useS" type="checkbox"></label>
 </div>
 
-<div class="sub">Color</div><div class="colors" id="colors"></div>
-<div class="hex"><input id="color" type="color" value="#ffffff"><input id="hex" value="FFFFFFFF" maxlength="8"></div>
-<div class="field"><div class="label">Overall opacity <span class="val" id="opacityV"></span></div><input id="opacity" type="range" min="0" max="1" step=".01"></div>
+<div class="sub">Crosshair</div>
+<div class="setting-select">
+  <div class="label"><span>Crosshair Color</span><span class="val" id="colorName">White</span></div>
+  <select id="colorSelect"></select>
+</div>
+<div class="hex"><input id="color" type="color" value="#FFFFFF"><input id="hex" value="FFFFFFFF" maxlength="8"></div>
 
-<div class="sub">Outlines</div><label class="row">Show outlines <input id="outline" type="checkbox"></label>
+<div class="field">
+  <div class="label"><span>Overall Crosshair Opacity</span><span class="val" id="opacityV"></span></div>
+  <input id="opacity" type="range" min="0" max="1" step=".01">
+</div>
+
+<div class="sub">Outlines</div>
+<label class="row">Outlines <span class="seg"><button type="button" id="outlineOn">On</button><button type="button" id="outlineOff">Off</button></span></label>
+<div class="field"><div class="label"><span>Outline Opacity</span><span class="val" id="outlineOV"></span></div><input id="outlineO" type="range" min="0" max="1" step=".01"></div>
+<div class="field"><div class="label"><span>Outline Thickness</span><span class="val" id="outlineTV"></span></div><input id="outlineT" type="range" min="0" max="10" step=".1"></div>
 
 <div class="sub">Center Dot</div>
-<label class="row">Show center dot <input id="dot" type="checkbox"></label>
-<div class="field"><div class="label">Dot thickness <span class="val" id="dotTVal"></span></div><input id="dotT" type="range" min=".5" max="10" step=".1"></div>
-<div class="field"><div class="label">Dot opacity <span class="val" id="dotOVal"></span></div><input id="dotO" type="range" min="0" max="1" step=".01"></div>
+<label class="row">Center Dot <span class="seg"><button type="button" id="dotOn">On</button><button type="button" id="dotOff">Off</button></span></label>
+<div class="field"><div class="label"><span>Center Dot Opacity</span><span class="val" id="dotOVal"></span></div><input id="dotO" type="range" min="0" max="1" step=".01"></div>
+<div class="field"><div class="label"><span>Center Dot Thickness</span><span class="val" id="dotTVal"></span></div><input id="dotT" type="range" min=".1" max="10" step=".1"></div>
+
+<label class="row">Override Firing Error Offset With Crosshair Offset <span class="seg"><button type="button" id="overrideOn">On</button><button type="button" id="overrideOff">Off</button></span></label>
 
 <div id="lineControls"></div>
-<div id="sniperControls" style="display:none">
-<div class="sub">Sniper</div>
-<div class="field"><div class="label">Scale <span class="val" id="scaleVal"></span></div><input id="scale" type="range" min=".25" max="4" step=".01"></div>
+
+<div class="sub">Global Error</div>
+<div class="two">
+<label class="row">Movement Error <span class="seg"><button type="button" id="globalMoveOn">On</button><button type="button" id="globalMoveOff">Off</button></span></label>
+<label class="row">Firing Error <span class="seg"><button type="button" id="globalFireOn">On</button><button type="button" id="globalFireOff">Off</button></span></label>
 </div>
+
+<div id="sniperControls" style="display:none">
+<div class="sub">Sniper / Scope</div>
+<div class="field"><div class="label"><span>Scope Scale</span><span class="val" id="scaleVal"></span></div><input id="scale" type="range" min=".25" max="4" step=".01"></div>
+</div>
+</div></div>
+
 </div></div>
 
 <div class="panel"><div class="inner">
@@ -122,32 +149,32 @@ const BACKGROUNDS=[
 ];
 
 function group(){
- return {show:true,opacity:1,length:6,thick:2,offset:3,fire:false,move:false,
-         axis:{h:null,v:null},unknown:{}};
+ return {
+   show:true, opacity:1, length:6, lengthH:6, lengthV:6, linked:true,
+   thick:2, offset:3, move:false, moveMult:1, fire:false, fireMult:1,
+   axis:{h:null,v:null}, unknown:{}
+ };
 }
 function profile(){
- return {colorIndex:0,customHex:'FFFFFFFF',opacity:1,outlines:true,
- dotShow:false,dotThick:2,dotOpacity:1,fireErr:false,moveErr:false,
- inner:group(),outer:{...group(),show:false,offset:10},scale:1,unknown:[],rawTokens:[]};
+ return {
+   colorIndex:0,customHex:'FFFFFFFF',opacity:1,
+   outlines:true,outlineOpacity:.5,outlineThick:1,
+   dotShow:false,dotThick:2,dotOpacity:1,
+   overrideFireOffset:false,fireErr:false,moveErr:false,
+   inner:group(),outer:{...group(),show:false,offset:10},
+   scale:1,unknown:[],rawTokens:[]
+ };
 }
 function clone(x){return JSON.parse(JSON.stringify(x))}
 let state={useADS:false,useSniper:false,P:profile(),A:profile(),S:profile()};
 let active='P';
 
-/* ---------- Robust tokenization ---------- */
 function tokenize(code){
  let t=String(code||'').trim().split(';').map(x=>x.trim()).filter(Boolean);
  if(t[0]==='0')t.shift();
  return t;
 }
 function isSection(x){return x==='P'||x==='A'||x==='S'}
-function knownKey(k){
- return /^(?:c|u|o|h|d|z|a|f|m|s|[01][bltoafm]|[01][v]|[01][hvo]|[01][lgse].*)$/i.test(k);
-}
-/*
-  Section parser is key-aware rather than blindly consuming every next token.
-  Section markers are always boundaries. A key without a value is retained.
-*/
 function parseSections(code){
  const toks=tokenize(code), sec={P:[],A:[],S:[]}; let cur='P';
  for(let i=0;i<toks.length;){
@@ -160,38 +187,56 @@ function parseSections(code){
 }
 function num(v,d){const n=Number(v);return Number.isFinite(n)?n:d}
 function bool(v,d){return v==null?d:(v==='1'||v===true)}
-function kvMap(arr){
- const m=new Map();
- arr.forEach(([k,v])=>m.set(k,v));
- return m;
-}
+function kvMap(arr){const m=new Map();arr.forEach(([k,v])=>m.set(k,v));return m}
+
 function readProfile(arr,isSniper){
  const p=profile(),m=kvMap(arr);p.rawTokens=arr.slice();
  const take=(k,d)=>m.has(k)?m.get(k):d;
+
+ if(m.has('c'))p.colorIndex=Math.max(0,Math.min(8,parseInt(m.get('c'),10)||0));
  if(m.has('u')){p.colorIndex=8;p.customHex=(String(m.get('u'))+'FFFFFFFF').slice(0,8).toUpperCase()}
- else if(m.has('c'))p.colorIndex=Math.max(0,Math.min(8,parseInt(m.get('c'),10)||0));
- p.opacity=num(take('o',1),1);p.outlines=bool(take('h',1),true);
- p.dotShow=bool(take('d',0),false);p.dotThick=num(take('z',2),2);
- p.dotOpacity=num(take('a',1),1);p.fireErr=bool(take('f',0),false);p.moveErr=bool(take('m',0),false);
+ p.opacity=num(take('o',1),1);
+ p.outlines=bool(take('h',1),true);
+ p.outlineOpacity=num(take('t',.5),.5);
+ p.outlineThick=num(take('h',1),1);
+ p.dotShow=bool(take('d',0),false);
+ p.dotThick=num(take('z',2),2);
+ p.dotOpacity=num(take('a',1),1);
+ p.overrideFireOffset=bool(take('q',0),false);
+ p.fireErr=bool(take('f',0),false);
+ p.moveErr=bool(take('m',0),false);
  p.scale=num(take('s',1),1);
 
  for(const pre of ['0','1']){
    const g=pre==='0'?p.inner:p.outer;
-   if(m.has(pre+'b'))g.show=bool(m.get(pre+'b'),g.show);
-   else if(m.has(pre+'l')||m.has(pre+'t')||m.has(pre+'o')||m.has(pre+'a'))g.show=true;
+   g.show=bool(take(pre+'b',g.show),g.show);
    g.length=num(take(pre+'l',g.length),g.length);
+   g.lengthH=num(take(pre+'l',g.length),g.length);
+   g.lengthV=num(take(pre+'v',g.length),g.length);
    g.thick=num(take(pre+'t',g.thick),g.thick);
    g.offset=num(take(pre+'o',g.offset),g.offset);
    g.opacity=num(take(pre+'a',g.opacity),g.opacity);
-   g.fire=bool(take(pre+'f',g.fire));g.move=bool(take(pre+'m',g.move));
+   g.move=bool(take(pre+'m',g.move),g.move);
+   g.moveMult=num(take(pre+'m',g.moveMult),g.moveMult);
+   g.fire=bool(take(pre+'f',g.fire),g.fire);
+   g.fireMult=num(take(pre+'f',g.fireMult),g.fireMult);
 
-   /* Preserve possible advanced/unlinked axis fields. We do not invent
-      their semantics; values are retained and used when clearly numeric. */
+   /* Preserve separate horizontal/vertical values when present.
+      We never invent a meaning for unknown tokens. */
    for(const suffix of ['l','t','o','a','v','h','x','y']){
-     const k=pre+suffix;if(m.has(k))g.axis[suffix]=num(m.get(k),null);
+     const k=pre+suffix;
+     if(m.has(k))g.axis[suffix]=num(m.get(k),null);
    }
+   if(g.axis.h!=null)g.lengthH=g.axis.h;
+   if(g.axis.v!=null)g.lengthV=g.axis.v;
+   g.linked=Math.abs(g.lengthH-g.lengthV)<0.000001;
  }
- for(const [k,v] of arr)if(!knownKey(k))p.unknown.push([k,v]);
+ for(const [k,v] of arr){
+   /* Known keys from the existing model plus common advanced aliases.
+      Unknown keys are still preserved. */
+   const known=/^(?:c|u|o|h|d|z|a|q|f|m|s|[01][bltoafmvhxy])$/i.test(k);
+   if(!known)p.unknown.push([k,v]);
+ }
  return p;
 }
 function parseCode(code){
@@ -200,25 +245,32 @@ function parseCode(code){
    P:readProfile(s.P,false),A:readProfile(s.A,false),S:readProfile(s.S,true)};
 }
 
-/* ---------- Export ---------- */
 function fmt(v){return Number.isFinite(Number(v))?String(Math.round(Number(v)*1000)/1000):String(v)}
 function colorTokens(p){
  return p.colorIndex===8?['c','8','u',p.customHex.toUpperCase()]:['c',String(p.colorIndex)];
 }
 function profileTokens(p,sniper){
- let t=[...colorTokens(p),'o',fmt(p.opacity),'h',p.outlines?'1':'0','d',p.dotShow?'1':'0'];
+ let t=[...colorTokens(p),'o',fmt(p.opacity),'h',p.outlines?'1':'0'];
+ t.push('d',p.dotShow?'1':'0');
  if(p.dotShow)t.push('z',fmt(p.dotThick),'a',fmt(p.dotOpacity));
- if(sniper){t.push('s',fmt(p.scale));}
+ if(p.overrideFireOffset)t.push('q','1');
+ if(sniper){t.push('s',fmt(p.scale))}
  else{
    t.push('f',p.fireErr?'1':'0','m',p.moveErr?'1':'0');
    for(const [pre,g] of [['0',p.inner],['1',p.outer]]){
      t.push(pre+'b',g.show?'1':'0');
-     if(g.show)t.push(pre+'l',fmt(g.length),pre+'t',fmt(g.thick),pre+'o',fmt(g.offset),
-       pre+'a',fmt(g.opacity),pre+'f',g.fire?'1':'0',pre+'m',g.move?'1':'0');
-     /* Advanced axis values are emitted only when they existed in the import.
-        This prevents us from inventing tokens for ordinary profiles. */
-     for(const suffix of ['l','t','o','a','v','h','x','y'])
-       if(g.axis[suffix]!==null) t.push(pre+suffix,fmt(g.axis[suffix]));
+     if(g.show){
+       /* Keep both dimensions when they differ. */
+       if(g.linked)t.push(pre+'l',fmt(g.length));
+       else t.push(pre+'l',fmt(g.lengthH),pre+'v',fmt(g.lengthV));
+       t.push(pre+'t',fmt(g.thick),pre+'o',fmt(g.offset),pre+'a',fmt(g.opacity));
+       t.push(pre+'f',g.fire?'1':'0',pre+'m',g.move?'1':'0');
+       if(g.move)t.push(pre+'M',fmt(g.moveMult));
+       if(g.fire)t.push(pre+'F',fmt(g.fireMult));
+       for(const suffix of ['h','x','y']){
+         if(g.axis[suffix]!==null)t.push(pre+suffix,fmt(g.axis[suffix]));
+       }
+     }
    }
  }
  for(const [k,v] of p.unknown)t.push(k,...(v===null?[]:[v]));
@@ -231,39 +283,46 @@ function generateCode(){
  return t.join(';');
 }
 
-/* ---------- Canvas renderer ---------- */
+/* Canvas renderer */
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
 function rgba(hex,a=1){
- hex=String(hex||'FFFFFFFF').replace('#','');if(hex.length<6)hex='FFFFFFFF';
+ hex=String(hex||'FFFFFFFF').replace('#','');
+ if(hex.length<6)hex='FFFFFFFF';
  const r=parseInt(hex.slice(0,2),16)||255,g=parseInt(hex.slice(2,4),16)||255,b=parseInt(hex.slice(4,6),16)||255;
  return `rgba(${r},${g},${b},${Math.max(0,Math.min(1,a))})`;
 }
 function colorOf(p){return p.colorIndex===8?p.customHex:(COLORS.find(x=>x.i===p.colorIndex)||COLORS[0]).h}
 function rect(x,y,w,h,fill){ctx.fillStyle=fill;ctx.fillRect(x,y,w,h)}
-function segment(cx,cy,side,g,scale,color,overall){
- let axis=g.axis||{}, len=axis[side==='L'||side==='R'?'l':'l'];
- let thick=axis[side==='L'||side==='R'?'t':'t'];
- let off=axis[side==='L'||side==='R'?'o':'o'];
- /* If explicit horizontal/vertical numeric values exist, prefer them. */
+function drawSegment(cx,cy,side,g,scale,color,overall){
+ let len=(side==='L'||side==='R')?g.lengthH:g.lengthV;
  if(side==='L'||side==='R'){
-   if(axis.h!=null)len=axis.h;if(axis.t!=null)thick=axis.t;if(axis.o!=null)off=axis.o;
- }else{
-   if(axis.v!=null)len=axis.v;if(axis.t!=null)thick=axis.t;if(axis.o!=null)off=axis.o;
- }
- len=Number.isFinite(len)?len:g.length;thick=Number.isFinite(thick)?thick:g.thick;off=Number.isFinite(off)?off:g.offset;
- len*=scale;thick*=scale;off*=scale;
+   if(g.axis.h!=null)len=g.axis.h;
+ }else if(g.axis.v!=null)len=g.axis.v;
+ len=num(len,g.length)*scale;
+ let thick=num(g.thick,2)*scale;
+ let off=num(g.offset,3)*scale;
  const alpha=g.opacity*overall;
+
  let x=cx,y=cy,w=thick,h=len;
- if(side==='L'){x=cx-off-len; y=cy-thick/2;w=len;h=thick}
+ if(side==='L'){x=cx-off-len;y=cy-thick/2;w=len;h=thick}
  if(side==='R'){x=cx+off;y=cy-thick/2;w=len;h=thick}
  if(side==='T'){x=cx-thick/2;y=cy-off-len;w=thick;h=len}
  if(side==='B'){x=cx-thick/2;y=cy+off;w=thick;h=len}
- if(state[active].outlines){ctx.fillStyle='rgba(0,0,0,.72)';ctx.fillRect(x-1.5,y-1.5,w+3,h+3)}
+
+ if(state[active].outlines && state[active].outlineThick>0){
+   const ot=state[active].outlineThick*scale;
+   ctx.fillStyle=rgba('000000FF',state[active].outlineOpacity);
+   ctx.fillRect(x-ot,y-ot,w+ot*2,h+ot*2);
+ }
  rect(x,y,w,h,rgba(color,alpha));
 }
-function dot(cx,cy,p,scale,color){
- const s=Math.max(.5,p.dotThick*scale),a=p.dotOpacity*p.opacity;
- if(p.outlines){ctx.fillStyle='rgba(0,0,0,.72)';ctx.fillRect(cx-s/2-1.5,cy-s/2-1.5,s+3,s+3)}
+function drawDot(cx,cy,p,scale,color){
+ const s=Math.max(.1,p.dotThick*scale),a=p.dotOpacity*p.opacity;
+ if(p.outlines && p.outlineThick>0){
+   const ot=p.outlineThick*scale;
+   ctx.fillStyle=rgba('000000FF',p.outlineOpacity);
+   ctx.fillRect(cx-s/2-ot,cy-s/2-ot,s+ot*2,s+ot*2);
+ }
  rect(cx-s/2,cy-s/2,s,s,rgba(color,a));
 }
 function render(){
@@ -271,109 +330,157 @@ function render(){
  ctx.clearRect(0,0,cv.width,cv.height);
  const color=colorOf(p);
  if(active==='S'){
-   /* Keep Sniper scale and center-dot information. Other scoped behavior
-      depends on game-specific reticle semantics not represented by the
-      supplied source model, so no fake geometry is added. */
-   if(p.dotShow)dot(cx,cy,p,S,color);
+   if(p.dotShow)drawDot(cx,cy,p,S,color);
    return;
  }
- if(p.outer.show)['L','R','T','B'].forEach(x=>segment(cx,cy,x,p.outer,S,color,p.opacity));
- if(p.inner.show)['L','R','T','B'].forEach(x=>segment(cx,cy,x,p.inner,S,color,p.opacity));
- if(p.dotShow)dot(cx,cy,p,S,color);
+ if(p.outer.show)['L','R','T','B'].forEach(x=>drawSegment(cx,cy,x,p.outer,S,color,p.opacity));
+ if(p.inner.show)['L','R','T','B'].forEach(x=>drawSegment(cx,cy,x,p.inner,S,color,p.opacity));
+ if(p.dotShow)drawDot(cx,cy,p,S,color);
 }
 
-/* ---------- UI ---------- */
+/* UI */
 function $(id){return document.getElementById(id)}
 function setMsg(x){$('msg').textContent=x}
+
 function buildColors(){
- const w=$('colors');w.innerHTML='';
- COLORS.forEach(c=>{const e=document.createElement('button');e.className='swatch';e.style.background='#'+c.h.slice(0,6);e.title=c.n;e.onclick=()=>{state[active].colorIndex=c.i;sync();};w.appendChild(e)});
- const e=document.createElement('button');e.className='swatch custom';e.title='Custom';e.onclick=()=>{state[active].colorIndex=8;sync()};w.appendChild(e);
+ const w=$('colors');
+ if(w)w.innerHTML='';
+ const select=$('colorSelect');select.innerHTML='';
+ COLORS.forEach(c=>{
+   if(w){const e=document.createElement('button');e.className='swatch';e.style.background='#'+c.h.slice(0,6);e.title=c.n;e.onclick=()=>{state[active].colorIndex=c.i;sync();};w.appendChild(e)}
+   const o=document.createElement('option');o.value=c.i;o.textContent=c.n;select.appendChild(o);
+ });
+ const custom=document.createElement('option');custom.value=8;custom.textContent='Custom';select.appendChild(custom);
+ select.onchange=()=>{state[active].colorIndex=Number(select.value);sync(false)};
 }
+
+function segmentButtons(prefix, value, onChange){
+ const on=$(prefix+'On'),off=$(prefix+'Off');
+ if(!on||!off)return;
+ on.classList.toggle('active',!!value);off.classList.toggle('active',!value);
+ on.onclick=()=>onChange(true);off.onclick=()=>onChange(false);
+}
+
 function lineUI(){
  const w=$('lineControls');w.innerHTML='';
- for(const [key,name] of [['inner','Inner Lines'],['outer','Outer Lines']]){
+ for(const [key,name]=[['inner','Inner Lines'],['outer','Outer Lines']]){
   const g=state[active][key];
   const box=document.createElement('div');
-  box.innerHTML=`<div class="sub">${name}</div>
-  <label class="row">Show ${name.toLowerCase()} <input data-k="${key}.show" type="checkbox" ${g.show?'checked':''}></label>
-  <div class="two">
-   <div class="field"><div class="label">Opacity <span class="val">${g.opacity.toFixed(2)}</span></div><input data-k="${key}.opacity" type="range" min="0" max="1" step=".01" value="${g.opacity}"></div>
-   <div class="field"><div class="label">Length <span class="val">${g.length}</span></div><input data-k="${key}.length" type="range" min="0" max="50" step=".1" value="${g.length}"></div>
-   <div class="field"><div class="label">Thickness <span class="val">${g.thick}</span></div><input data-k="${key}.thick" type="range" min=".1" max="20" step=".1" value="${g.thick}"></div>
-   <div class="field"><div class="label">Offset <span class="val">${g.offset}</span></div><input data-k="${key}.offset" type="range" min="0" max="50" step=".1" value="${g.offset}"></div>
+  box.innerHTML=`
+  <div class="sub">${name}</div>
+  <label class="row">Show ${name.toLowerCase()} <span class="seg"><button type="button" data-toggle="${key}.show:1">On</button><button type="button" data-toggle="${key}.show:0">Off</button></span></label>
+  <div class="field"><div class="label"><span>${name.slice(0,-1)} Opacity</span><span class="val" data-v="${key}.opacity">${g.opacity.toFixed(2)}</span></div><input data-k="${key}.opacity" type="range" min="0" max="1" step=".01" value="${g.opacity}"></div>
+  <div class="field">
+    <div class="label"><span>${name.slice(0,-1)} Length <small>(Horizontal / Vertical)</small></span><span class="val" data-v="${key}.length">${g.lengthH} / ${g.lengthV}</span></div>
+    <div class="dual"><input data-k="${key}.lengthH" type="range" min="0" max="50" step=".1" value="${g.lengthH}"><button type="button" class="link ${g.linked?'active':''}" data-link="${key}">🔗</button><input data-k="${key}.lengthV" type="range" min="0" max="50" step=".1" value="${g.lengthV}"></div>
   </div>
-  <div class="two">
-   <label class="row">Firing error <input data-k="${key}.fire" type="checkbox" ${g.fire?'checked':''}></label>
-   <label class="row">Movement error <input data-k="${key}.move" type="checkbox" ${g.move?'checked':''}></label>
-  </div>`;
+  <div class="field"><div class="label"><span>${name.slice(0,-1)} Thickness</span><span class="val" data-v="${key}.thick">${g.thick}</span></div><input data-k="${key}.thick" type="range" min=".1" max="20" step=".1" value="${g.thick}"></div>
+  <div class="field"><div class="label"><span>${name.slice(0,-1)} Offset</span><span class="val" data-v="${key}.offset">${g.offset}</span></div><input data-k="${key}.offset" type="range" min="0" max="50" step=".1" value="${g.offset}"></div>
+  <label class="row">Movement Error <span class="seg"><button type="button" data-toggle="${key}.move:1">On</button><button type="button" data-toggle="${key}.move:0">Off</button></span></label>
+  <div class="field"><div class="label"><span>Movement Error Multiplier</span><span class="val" data-v="${key}.moveMult">${g.moveMult}</span></div><input data-k="${key}.moveMult" type="range" min="0" max="5" step=".1" value="${g.moveMult}"></div>
+  <label class="row">Firing Error <span class="seg"><button type="button" data-toggle="${key}.fire:1">On</button><button type="button" data-toggle="${key}.fire:0">Off</button></span></label>
+  <div class="field"><div class="label"><span>Firing Error Multiplier</span><span class="val" data-v="${key}.fireMult">${g.fireMult}</span></div><input data-k="${key}.fireMult" type="range" min="0" max="5" step=".1" value="${g.fireMult}"></div>`;
   w.appendChild(box);
+
+  box.querySelectorAll('[data-toggle]').forEach(b=>{
+    const [path,val]=b.dataset.toggle.split(':');b.onclick=()=>{
+      const [a,c]=path.split('.');state[active][a][c]=val==='1';lineUI();sync(false);
+    };
+  });
+  box.querySelectorAll('[data-k]').forEach(el=>el.oninput=()=>{
+    const [a,c]=el.dataset.k.split('.');state[active][a][c]=Number(el.value);
+    if(c==='lengthH'&&g.linked){g.lengthV=g.lengthH}
+    if(c==='lengthV'&&g.linked){g.lengthH=g.lengthV}
+    sync(false);
+  });
+  box.querySelector('[data-link]').onclick=()=>{
+    g.linked=!g.linked;if(g.linked){g.lengthV=g.lengthH}lineUI();sync(false);
+  };
  }
- w.querySelectorAll('[data-k]').forEach(el=>el.oninput=el.onchange=()=>{
-   const [a,b]=el.dataset.k.split('.');state[active][a][b]=el.type==='checkbox'?el.checked:Number(el.value);sync(false);
- });
 }
+function updateToggleButtons(){
+ segmentButtons('outline',state[active].outlines,v=>{state[active].outlines=v;sync(false)});
+ segmentButtons('dot',state[active].dotShow,v=>{state[active].dotShow=v;sync(false)});
+ segmentButtons('override',state[active].overrideFireOffset,v=>{state[active].overrideFireOffset=v;sync(false)});
+ segmentButtons('globalMove',state[active].moveErr,v=>{state[active].moveErr=v;sync(false)});
+ segmentButtons('globalFire',state[active].fireErr,v=>{state[active].fireErr=v;sync(false)});
+}
+
 function sync(rebuild=true){
  const p=state[active];
  $('section').textContent=active==='P'?'Primary':active==='A'?'ADS':'Sniper';
  $('useA').checked=state.useADS;$('useS').checked=state.useSniper;
  $('tabA').disabled=!state.useADS;$('tabS').disabled=!state.useSniper;
  $('tabP').classList.toggle('active',active==='P');$('tabA').classList.toggle('active',active==='A');$('tabS').classList.toggle('active',active==='S');
+
+ $('colorSelect').value=p.colorIndex;$('colorName').textContent=p.colorIndex===8?'Custom':(COLORS.find(x=>x.i===p.colorIndex)||COLORS[0]).n;
  $('opacity').value=p.opacity;$('opacityV').textContent=p.opacity.toFixed(2);
- $('outline').checked=p.outlines;$('dot').checked=p.dotShow;
+ $('outlineO').value=p.outlineOpacity;$('outlineOV').textContent=p.outlineOpacity.toFixed(2);
+ $('outlineT').value=p.outlineThick;$('outlineTV').textContent=p.outlineThick;
  $('dotT').value=p.dotThick;$('dotTVal').textContent=p.dotThick;
  $('dotO').value=p.dotOpacity;$('dotOVal').textContent=p.dotOpacity.toFixed(2);
  $('color').value='#'+p.customHex.slice(0,6);$('hex').value=p.customHex;
- $('sniperControls').style.display=active==='S'?'block':'none';$('scale').value=p.scale;$('scaleVal').textContent=p.scale.toFixed(2);
- [...$('colors').children].forEach((e,i)=>e.classList.toggle('active',i===p.colorIndex));
+
+ $('sniperControls').style.display=active==='S'?'block':'none';
+ $('scale').value=p.scale;$('scaleVal').textContent=p.scale.toFixed(2);
+ updateToggleButtons();
  if(rebuild)lineUI();
  $('out').value=generateCode();render();
 }
-function setActive(x){if(x==='A'&&!state.useADS)return;if(x==='S'&&!state.useSniper)return;active=x;sync()}
 
 $('useA').onchange=e=>{state.useADS=e.target.checked;sync()}
 $('useS').onchange=e=>{state.useSniper=e.target.checked;sync()}
-$('outline').onchange=e=>{state[active].outlines=e.target.checked;sync(false)}
-$('dot').onchange=e=>{state[active].dotShow=e.target.checked;sync(false)}
+$('opacity').oninput=e=>{state[active].opacity=Number(e.target.value);sync(false)}
+$('outlineO').oninput=e=>{state[active].outlineOpacity=Number(e.target.value);sync(false)}
+$('outlineT').oninput=e=>{state[active].outlineThick=Number(e.target.value);sync(false)}
 $('dotT').oninput=e=>{state[active].dotThick=Number(e.target.value);sync(false)}
 $('dotO').oninput=e=>{state[active].dotOpacity=Number(e.target.value);sync(false)}
-$('opacity').oninput=e=>{state[active].opacity=Number(e.target.value);sync(false)}
 $('scale').oninput=e=>{state[active].scale=Number(e.target.value);sync(false)}
 $('color').oninput=e=>{state[active].customHex=e.target.value.slice(1).toUpperCase()+(state[active].customHex.slice(6,8)||'FF');state[active].colorIndex=8;sync(false)}
 $('hex').oninput=e=>{let v=e.target.value.toUpperCase().replace(/[^0-9A-F]/g,'').slice(0,8);state[active].customHex=(v+'FFFFFFFF').slice(0,8);state[active].colorIndex=8;sync(false)}
 $('tabP').onclick=()=>setActive('P');$('tabA').onclick=()=>setActive('A');$('tabS').onclick=()=>setActive('S');
-$('copy').onclick=async()=>{try{await navigator.clipboard.writeText($('out').value);setMsg('Copied.')}catch{$('out').select();setMsg('Clipboard blocked — press Ctrl+C.')}};
+
+$('copy').onclick=async()=>{
+ try{await navigator.clipboard.writeText($('out').value);setMsg('Copied.')}
+ catch{$('out').select();setMsg('Clipboard blocked — press Ctrl+C.')}
+};
 $('load').onclick=()=>{
- try{const raw=$('input').value,parsed=parseCode(raw);if(!parsed.P.rawTokens.length)throw Error('No Primary profile found');
- state=parsed;active='P';sync();setMsg('Imported successfully. Unknown tokens were preserved.');diagnose(raw);
+ try{
+   const raw=$('input').value,parsed=parseCode(raw);
+   if(!parsed.P.rawTokens.length)throw Error('No Primary profile found');
+   state=parsed;active='P';sync();setMsg('Imported successfully.');diagnose(raw);
  }catch(e){setMsg('Import failed: '+e.message)}
 };
-$('reset').onclick=()=>{state={useADS:false,useSniper:false,P:profile(),A:profile(),S:profile()};active='P';$('input').value='';sync();setMsg('Reset.')};
+$('reset').onclick=()=>{
+ state={useADS:false,useSniper:false,P:profile(),A:profile(),S:profile()};
+ active='P';$('input').value='';sync();setMsg('Reset.')
+};
 
 function diagnose(code){
  const s=parseSections(code),unknown=[];
- for(const sec of Object.values(s))for(const [k] of sec)if(!knownKey(k)&&!isSection(k))unknown.push(k);
- $('diagnostics').textContent=`Parsed P:${s.P.length} tokens · A:${s.A.length} · S:${s.S.length}`+(unknown.length?` · Preserved unknown keys: ${[...new Set(unknown)].join(', ')}`:' · No unknown keys detected');
+ for(const sec of Object.values(s))for(const [k] of sec)
+   if(!/^(?:c|u|o|h|d|z|a|q|f|m|s|[01][bltoafmvhxy])$/i.test(k))unknown.push(k);
+ $('diagnostics').textContent=`Parsed P:${s.P.length} · A:${s.A.length} · S:${s.S.length}`+
+ (unknown.length?` · Preserved unknown keys: ${[...new Set(unknown)].join(', ')}`:' · No unknown keys detected');
 }
 function selfTests(){
  const cases=[
   '0;P;c;5;o;1;d;1;z;3;0b;1;0l;4;0t;1;0o;2;1b;0',
-  '0;P;c;4;o;0.5;h;1;d;0;0b;1;0l;6;0t;2;0o;3;A;c;6;o;1;0b;1;0l;2;0t;1;0o;1;S;c;0;o;1;s;1.25',
+  '0;P;c;4;o;0.5;h;1;d;0;0b;1;0l;6;0v;2;0t;2;0o;3;A;c;6;o;1;0b;1;0l;2;0t;1;0o;1;S;c;0;o;1;s;1.25',
   '0;P;c;8;u;FF8800FF;0b;1;0l;4;0t;1;0o;2;weird;123'
  ];
  let ok=0;for(const c of cases){try{const p=parseCode(c);if(generateFrom(p))ok++}catch{}}
  $('diagnostics').textContent=`Built-in parser smoke tests: ${ok}/${cases.length} passed.`;
 }
-function generateFrom(x){
- const old=state;state=x;const c=generateCode();state=old;return c;
-}
+function generateFrom(x){const old=state;state=x;const c=generateCode();state=old;return c}
+
 buildColors();
 $('bg').innerHTML=BACKGROUNDS.map((b,i)=>`<button title="${b[1]}" style="background:${b[0]}" data-i="${i}"></button>`).join('');
 [...$('bg').children].forEach((b,i)=>b.onclick=()=>{$('stage').style.background=BACKGROUNDS[i][0];[...$('bg').children].forEach(x=>x.classList.remove('active'));b.classList.add('active')});
 $('bg').children[0].classList.add('active');$('stage').style.background=BACKGROUNDS[0][0];
 
 const PRESETS=[
- ['TenZ','Sentinels','#ff00ff','0;P;c;5;h;0;m;1;0l;4;0o;2;0a;1;1b;0;S;c;4;o;1'],
+ ['TenZ','Sentinels','#ff00ff','0;P;c;5;h;0;m;1;0l;4;0o;2;0a;1;1b;0'],
  ['ScreaM','KOI','#ff00ff','0;P;c;5;o;1;d;1;z;3;f;0;0t;6;0l;0;0a;1;0f;0;1b;0;S;c;6;s;0.949;o;1'],
  ['Boaster','Fnatic','#00ff00','0;P;c;1;o;1;d;1;0l;0;0o;2;0a;1;0f;0;1t;0;1l;0;1o;0;1a;0;S;c;1;o;1'],
  ['Chronicle','Fnatic','#f2f2f2','0;P;c;7;o;1;f;0;0t;1;0l;2;0o;2;0a;1;0f;0;1b;0']
