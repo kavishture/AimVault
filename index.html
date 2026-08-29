@@ -73,8 +73,6 @@
   }
   .bg-swatches button.active{border-color:var(--red);}
   .preview-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:10px;}
-  .zoom-row{display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--steel);}
-  .zoom-row input{width:120px;accent-color:var(--red);}
 
   .weapon-tabs{display:flex;gap:6px;margin-bottom:14px;}
   .weapon-tabs button{
@@ -197,11 +195,6 @@
 
           <div class="preview-row">
             <div class="bg-swatches" id="bgSwatches"></div>
-            <div class="zoom-row">
-              <span>ZOOM</span>
-              <input type="range" id="zoom" min="1" max="4" step="0.1" value="2">
-              <span id="zoomVal">2.0×</span>
-            </div>
           </div>
         </div>
       </div>
@@ -223,9 +216,12 @@
       <div class="foot-note">
         In Valorant: <b>Settings → Crosshair → Import Profile Code</b>, paste the code above, then Confirm.
         Codes follow the community-reverse-engineered <b>0;P;…;A;…;S;…</b> schema (color <b>c/u</b>, outlines <b>h</b>, center dot <b>d/z</b>,
-        inner/outer lines prefixed <b>0</b>/<b>1</b> for show <b>b</b>, length <b>l</b>, thickness <b>t</b>, offset <b>o</b>, opacity <b>a</b>,
-        error toggles <b>f/m</b>, sniper scale <b>s</b>). This preview renders those exact values pixel-for-pixel — actual in-client
-        rendering may vary very slightly by resolution/aspect ratio.
+        inner/outer lines prefixed <b>0</b>/<b>1</b> for show, length <b>l</b>, thickness <b>t</b>, offset <b>o</b>, opacity <b>a</b>,
+        error toggles <b>f/m</b>, sniper scale <b>s</b>). Loading a code always drops you on the <b>Primary</b> tab — switch to
+        <b>ADS</b> / <b>Sniper Scoped</b> to see those profiles if the code sets them separately (e.g. a code with a different
+        Sniper color won't show it until you click that tab). One known gap: a handful of codes carry separate horizontal/vertical
+        values for one axis (an "unlinked" advanced option) — this reader uses the primary value for both, so those specific codes
+        may render very slightly asymmetric compared to in-game.
       </div>
     </div>
 
@@ -237,10 +233,10 @@
 
           <div id="advToggles" class="two-col" style="margin-bottom:4px;">
             <div class="toggle-row"><label>Use Advanced (ADS)</label>
-              <span class="switch"><input type="checkbox" id="useADS"><span class="track"></span></span>
+              <label class="switch"><input type="checkbox" id="useADS"><span class="track"></span></label>
             </div>
             <div class="toggle-row"><label>Use Advanced (Sniper)</label>
-              <span class="switch"><input type="checkbox" id="useSniper"><span class="track"></span></span>
+              <label class="switch"><input type="checkbox" id="useSniper"><span class="track"></span></label>
             </div>
           </div>
 
@@ -260,14 +256,14 @@
           <div id="outlineBlock">
             <div class="subhead">Outlines</div>
             <div class="toggle-row"><label>Show Outlines</label>
-              <span class="switch"><input type="checkbox" id="outlines" checked><span class="track"></span></span>
+              <label class="switch"><input type="checkbox" id="outlines" checked><span class="track"></span></label>
             </div>
           </div>
 
           <div id="dotBlock">
             <div class="subhead">Center Dot</div>
             <div class="toggle-row"><label>Show Center Dot</label>
-              <span class="switch"><input type="checkbox" id="dotShow"><span class="track"></span></span>
+              <label class="switch"><input type="checkbox" id="dotShow"><span class="track"></span></label>
             </div>
             <div class="field" style="margin-top:10px;">
               <div class="field-label"><label>Dot Thickness</label><span class="val" id="v_dotThick">2</span></div>
@@ -282,17 +278,17 @@
           <div id="errorBlock">
             <div class="subhead">Error Behaviour</div>
             <div class="toggle-row"><label>Fade w/ Firing Error</label>
-              <span class="switch"><input type="checkbox" id="fireErr"><span class="track"></span></span>
+              <label class="switch"><input type="checkbox" id="fireErr"><span class="track"></span></label>
             </div>
             <div class="toggle-row"><label>Show Movement Error</label>
-              <span class="switch"><input type="checkbox" id="moveErr"><span class="track"></span></span>
+              <label class="switch"><input type="checkbox" id="moveErr"><span class="track"></span></label>
             </div>
           </div>
 
           <div id="linesBlock">
             <div class="subhead">Inner Lines</div>
             <div class="toggle-row"><label>Show Inner Lines</label>
-              <span class="switch"><input type="checkbox" id="in_show" checked><span class="track"></span></span>
+              <label class="switch"><input type="checkbox" id="in_show" checked><span class="track"></span></label>
             </div>
             <div class="two-col">
               <div class="field"><div class="field-label"><label>Opacity</label><span class="val" id="v_in_opacity">1.00</span></div>
@@ -306,14 +302,14 @@
             </div>
             <div class="two-col">
               <div class="toggle-row"><label>Firing Error</label>
-                <span class="switch"><input type="checkbox" id="in_fire"><span class="track"></span></span></div>
+                <label class="switch"><input type="checkbox" id="in_fire"><span class="track"></span></label></div>
               <div class="toggle-row"><label>Movement Error</label>
-                <span class="switch"><input type="checkbox" id="in_move"><span class="track"></span></span></div>
+                <label class="switch"><input type="checkbox" id="in_move"><span class="track"></span></label></div>
             </div>
 
             <div class="subhead">Outer Lines</div>
             <div class="toggle-row"><label>Show Outer Lines</label>
-              <span class="switch"><input type="checkbox" id="out_show"><span class="track"></span></span>
+              <label class="switch"><input type="checkbox" id="out_show"><span class="track"></span></label>
             </div>
             <div class="two-col">
               <div class="field"><div class="field-label"><label>Opacity</label><span class="val" id="v_out_opacity">1.00</span></div>
@@ -327,9 +323,9 @@
             </div>
             <div class="two-col">
               <div class="toggle-row"><label>Firing Error</label>
-                <span class="switch"><input type="checkbox" id="out_fire"><span class="track"></span></span></div>
+                <label class="switch"><input type="checkbox" id="out_fire"><span class="track"></span></label></div>
               <div class="toggle-row"><label>Movement Error</label>
-                <span class="switch"><input type="checkbox" id="out_move"><span class="track"></span></span></div>
+                <label class="switch"><input type="checkbox" id="out_move"><span class="track"></span></label></div>
             </div>
           </div>
 
@@ -503,6 +499,10 @@ function parseCode(code){
       g.opacity = getf(pre+'a', g.opacity);
       g.fire    = getb(pre+'f', g.fire);
       g.move    = getb(pre+'m', g.move);
+      // Secondary/asymmetric-axis keys some codes carry (v, g-link, s/e sub-scale)
+      // aren't separately modelled here — when present without a primary value
+      // they're used as a reasonable fallback so the shape still reads correctly.
+      if(!((pre+'t') in kv) && ((pre+'v') in kv)) g.thick = getf(pre+'v', g.thick);
     });
     return p;
   }
@@ -523,7 +523,7 @@ function parseCode(code){
    ========================================================================= */
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
-let zoom = 2.0;
+const zoom = 1.0; // locked 1:1 scale — 1 code unit = 1 canvas pixel
 
 function hexToRgba(hex, alphaMul){
   hex = hex.replace('#','');
@@ -745,12 +745,6 @@ function bindings(){
     });
   });
 
-  document.getElementById('zoom').addEventListener('input', e=>{
-    zoom = parseFloat(e.target.value);
-    document.getElementById('zoomVal').textContent = zoom.toFixed(1)+'×';
-    render();
-  });
-
   ['tab-P','tab-A','tab-S'].forEach(id=>{
     document.getElementById(id).addEventListener('click', ()=>{
       const t = document.getElementById(id).dataset.tab;
@@ -766,16 +760,40 @@ function bindings(){
 
   document.getElementById('copyBtn').addEventListener('click', ()=>{
     const ta = document.getElementById('codeOut');
-    ta.select(); document.execCommand('copy');
-    setMsg('Copied to clipboard.');
+    const text = ta.value;
+    const done = ()=> setMsg('Copied to clipboard.');
+    const fail = ()=>{
+      // Fallback for sandboxed contexts without clipboard permission:
+      // select the text so the person can hit Ctrl/Cmd+C themselves.
+      ta.removeAttribute('readonly');
+      ta.focus(); ta.select();
+      ta.setAttribute('readonly','');
+      setMsg('Clipboard blocked here — text is selected, press Ctrl/Cmd+C to copy.');
+    };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done).catch(fail);
+    } else {
+      try{
+        ta.removeAttribute('readonly');
+        ta.focus(); ta.select();
+        const ok = document.execCommand('copy');
+        ta.setAttribute('readonly','');
+        ok ? done() : fail();
+      }catch(err){ fail(); }
+    }
   });
+
   document.getElementById('loadBtn').addEventListener('click', ()=>{
     const raw = document.getElementById('codeIn').value;
     if(!raw.trim()){ setMsg('Paste a code first.'); return; }
-    const parsed = parseCode(raw);
-    if(!parsed){ setMsg('Could not read that code.'); return; }
-    applyParsed(parsed);
-    setMsg('Code imported.');
+    try{
+      const parsed = parseCode(raw);
+      if(!parsed){ setMsg('Could not read that code — check it starts with "0;".'); return; }
+      applyParsed(parsed);
+      setMsg('Code imported — showing Primary tab.');
+    }catch(err){
+      setMsg('That code has a shape this reader doesn\'t recognize: ' + err.message);
+    }
   });
   document.getElementById('resetBtn').addEventListener('click', ()=>{
     state = { useADS:false, useSniper:false, P:defaultProfile(), A:defaultProfile(), S:defaultProfile() };
