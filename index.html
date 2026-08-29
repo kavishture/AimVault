@@ -1,32 +1,907 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>AimVault — Valorant Crosshair Database</title>
-  <meta name="description" content="Discover, preview and copy Valorant crosshairs with AimVault.">
-  <link rel="icon" href="logo.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crosshair // Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0f1923;
+    --ink-2:#101c26;
+    --panel:#151f2b;
+    --panel-2:#1b2733;
+    --line:#26333f;
+    --steel:#8a9aa5;
+    --steel-dim:#5a6a75;
+    --paper:#ece8e1;
+    --red:#ff4655;
+    --red-dim:#9c2530;
+    --teal:#4ce0d2;
+    --shadow: 0 20px 50px rgba(0,0,0,.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 700px at 12% -10%, #16222e 0%, transparent 60%),
+      radial-gradient(1000px 700px at 110% 10%, #1a1420 0%, transparent 55%),
+      var(--ink);
+    color:var(--paper);
+    font-family:'Rajdhani',sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:1320px;margin:0 auto;padding:28px 22px 60px;}
+
+  /* ---- Header ---- */
+  .hdr{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:26px;flex-wrap:wrap;
+    border-bottom:1px solid var(--line);padding-bottom:18px;}
+  .hdr .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.28em;color:var(--red);text-transform:uppercase;margin:0 0 6px;}
+  .hdr h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:34px;letter-spacing:.02em;text-transform:uppercase;margin:0;
+    color:var(--paper);}
+  .hdr h1 span{color:var(--red);}
+  .hdr p{font-family:'JetBrains Mono',monospace;color:var(--steel);font-size:12px;margin:8px 0 0;max-width:520px;line-height:1.5;}
+
+  /* ---- Layout ---- */
+  .grid{display:grid;grid-template-columns:1.15fr 0.85fr;gap:20px;align-items:start;}
+  @media(max-width:980px){.grid{grid-template-columns:1fr;}}
+
+  .panel{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line);
+    position:relative;
+    clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+  }
+  .panel-inner{padding:18px 20px 20px;}
+  .panel-title{display:flex;align-items:center;gap:10px;margin:0 0 14px;}
+  .panel-title .tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--red);letter-spacing:.2em;
+    border:1px solid var(--red-dim);padding:2px 7px;text-transform:uppercase;}
+  .panel-title h2{font-family:'Oswald',sans-serif;font-weight:600;font-size:16px;letter-spacing:.04em;text-transform:uppercase;margin:0;color:var(--paper);}
+
+  /* ---- Preview ---- */
+  .preview-stage{
+    position:relative;border-radius:2px;overflow:hidden;height:440px;
+    display:flex;align-items:center;justify-content:center;
+    background:#232323;
+    border:1px solid var(--line);
+  }
+  .preview-stage canvas{display:block;image-rendering:pixelated;}
+  .bg-swatches{display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap;}
+  .bg-swatches button{
+    width:30px;height:30px;border-radius:3px;border:2px solid transparent;cursor:pointer;padding:0;
+  }
+  .bg-swatches button.active{border-color:var(--red);}
+  .preview-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:10px;}
+  .zoom-row{display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--steel);}
+  .zoom-row input{width:120px;accent-color:var(--red);}
+
+  .weapon-tabs{display:flex;gap:6px;margin-bottom:14px;}
+  .weapon-tabs button{
+    flex:1;font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.05em;text-transform:uppercase;font-size:12px;
+    background:var(--ink-2);border:1px solid var(--line);color:var(--steel);padding:9px 8px;cursor:pointer;
+    transition:.15s;
+  }
+  .weapon-tabs button.active{color:var(--paper);border-color:var(--red);background:linear-gradient(180deg,#241a1c,#1a1214);}
+  .weapon-tabs button:disabled{opacity:.35;cursor:not-allowed;}
+
+  /* ---- Controls ---- */
+  .field{margin-bottom:14px;}
+  .field-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .field-label label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--steel);}
+  .field-label .val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--teal);min-width:34px;text-align:right;}
+
+  input[type=range]{
+    -webkit-appearance:none;width:100%;height:4px;background:var(--line);border-radius:2px;outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:14px;height:14px;background:var(--red);border-radius:1px;cursor:pointer;
+    box-shadow:0 0 0 3px rgba(255,70,85,.18);
+  }
+  input[type=range]::-moz-range-thumb{width:14px;height:14px;background:var(--red);border:none;border-radius:1px;cursor:pointer;}
+
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px dashed var(--line);}
+  .toggle-row:last-child{border-bottom:none;}
+  .toggle-row label{font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.03em;color:var(--paper);}
+  .switch{position:relative;width:38px;height:20px;flex:none;}
+  .switch input{opacity:0;width:0;height:0;}
+  .switch .track{position:absolute;inset:0;background:var(--line);cursor:pointer;transition:.15s;border-radius:2px;}
+  .switch .track:before{content:"";position:absolute;width:14px;height:14px;left:3px;top:3px;background:var(--steel);transition:.15s;border-radius:1px;}
+  .switch input:checked + .track{background:var(--red-dim);}
+  .switch input:checked + .track:before{transform:translateX(18px);background:var(--red);}
+
+  .subhead{font-family:'JetBrains Mono',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--steel-dim);
+    margin:18px 0 10px;padding-top:12px;border-top:1px solid var(--line);}
+  .subhead:first-child{margin-top:0;padding-top:0;border-top:none;}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:0 18px;}
+
+  .color-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+  .swatch{
+    width:28px;height:28px;border-radius:2px;cursor:pointer;border:2px solid transparent;position:relative;
+  }
+  .swatch.active{border-color:#fff;}
+  .swatch.custom{background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);}
+  .hex-row{display:flex;gap:8px;align-items:center;margin-top:8px;}
+  .hex-row input[type=color]{width:34px;height:30px;border:1px solid var(--line);background:none;padding:0;cursor:pointer;}
+  .hex-row input[type=text]{
+    flex:1;background:var(--ink-2);border:1px solid var(--line);color:var(--paper);font-family:'JetBrains Mono',monospace;
+    font-size:12px;padding:7px 8px;letter-spacing:.05em;text-transform:uppercase;
+  }
+
+  /* ---- Code box ---- */
+  textarea.codebox{
+    width:100%;min-height:64px;resize:vertical;background:var(--ink-2);border:1px solid var(--line);color:var(--teal);
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:10px 12px;line-height:1.5;word-break:break-all;
+  }
+  .btn-row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
+  .btn{
+    font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.05em;text-transform:uppercase;font-size:12.5px;
+    background:var(--red);color:#1a0508;border:none;padding:10px 18px;cursor:pointer;
+    clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+    transition:.15s;
+  }
+  .btn:hover{filter:brightness(1.12);}
+  .btn.ghost{background:transparent;color:var(--paper);border:1px solid var(--line);}
+  .btn.ghost:hover{border-color:var(--steel);}
+  .btn.sm{padding:7px 12px;font-size:11px;}
+  .msg{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--teal);margin-top:8px;min-height:14px;}
+
+  /* ---- Presets ---- */
+  .preset-list{display:flex;flex-direction:column;gap:6px;max-height:210px;overflow-y:auto;padding-right:4px;}
+  .preset-list::-webkit-scrollbar{width:6px;}
+  .preset-list::-webkit-scrollbar-thumb{background:var(--line);}
+  .preset-item{
+    display:flex;align-items:center;gap:10px;background:var(--ink-2);border:1px solid var(--line);padding:9px 10px;
+    cursor:pointer;transition:.12s;
+  }
+  .preset-item:hover{border-color:var(--red-dim);background:#1c1013;}
+  .preset-item .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .preset-item .nm{font-family:'Oswald',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.02em;color:var(--paper);flex:1;}
+  .preset-item .role{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--steel-dim);}
+
+  .foot-note{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--steel-dim);line-height:1.6;margin-top:22px;
+    border-top:1px solid var(--line);padding-top:14px;}
+  .foot-note b{color:var(--steel);}
+
+  ::selection{background:var(--red);color:#1a0508;}
+</style>
 </head>
 <body>
-<header class="site-header">
-  <div class="header-inner">
-    <a class="brand" href="#home"><img src="logo.svg" alt="AimVault logo"><strong>AIM<span>VAULT</span></strong></a>
-    <nav aria-label="Main navigation">
-      <a href="#home">Home</a><a href="#crosshairs">Crosshairs</a><a href="#recent">Recently Added</a><a href="#popular">Most Copied</a>
-    </nav>
-    <label class="search"><span class="sr-only">Search crosshairs</span><input id="searchInput" type="search" placeholder="Search crosshairs..."></label>
-    <button class="menu" id="menu" aria-label="Open menu">☰</button>
+<div class="wrap">
+
+  <div class="hdr">
+    <div>
+      <p class="eyebrow">// settings &gt; crosshair</p>
+      <h1>Crosshair<span>.</span>Generator</h1>
+      <p>Build a crosshair on the actual Primary / ADS / Sniper parameters Valorant uses, preview it against real backdrops, and export an import code — or paste one in to reverse it.</p>
+    </div>
   </div>
-  <nav class="mobile-nav" id="mobileNav"><a href="#home">Home</a><a href="#crosshairs">Crosshairs</a><a href="#recent">Recently Added</a><a href="#popular">Most Copied</a></nav>
-</header>
-<main>
-<section class="hero" id="home"><div class="wrap hero-inner"><p class="eyebrow">VALORANT CROSSHAIR DATABASE</p><h1>Find your perfect crosshair.</h1><p>Discover, preview and copy Valorant crosshairs from the AimVault collection.</p><a class="button" href="#crosshairs">Browse Crosshairs</a><div class="stats"><div><b id="count">0</b><span>CROSSHAIRS</span></div><div><b id="proCount">0</b><span>PRO STYLES</span></div><div><b id="localCopies">0</b><span>LOCAL COPIES</span></div></div></div></section>
-<section class="section" id="recent"><div class="wrap"><div class="heading"><div><p class="eyebrow">CURATED COLLECTION</p><h2>Recently Added</h2></div></div><div class="grid" id="recentGrid"></div></div></section>
-<section class="section" id="popular"><div class="wrap"><div class="heading"><div><p class="eyebrow">THIS BROWSER</p><h2>Most Copied</h2></div></div><p class="note">Based on your local browser copy history. These are not global statistics.</p><div class="grid" id="popularGrid"></div></div></section>
-<section class="section" id="crosshairs"><div class="wrap"><div class="heading"><div><p class="eyebrow">DATABASE</p><h2>All Crosshairs</h2></div><label class="sort">Sort <select id="sort"><option value="recent">Recently Added</option><option value="name">Name A-Z</option><option value="copied">Most Copied</option></select></label></div><div class="grid" id="allGrid"></div></div></section>
-</main>
-<div class="modal" id="modal" hidden><div class="backdrop" data-close></div><div class="modal-box"><button class="close" data-close>×</button><div class="detail-image" id="detailImage"></div><h2 id="detailName"></h2><pre id="detailCode"></pre><button class="button" id="detailCopy">COPY CODE</button><p class="note" id="detailCount"></p></div></div>
-<script src="crosshairs.js"></script>
-<script src="app.js"></script>
-</body></html>
+
+  <div class="grid">
+    <!-- LEFT: PREVIEW -->
+    <div>
+      <div class="panel">
+        <div class="panel-inner">
+          <div class="panel-title"><span class="tag">Live</span><h2>Preview</h2></div>
+
+          <div class="weapon-tabs">
+            <button id="tab-P" class="active" data-tab="P">Primary</button>
+            <button id="tab-A" data-tab="A">ADS</button>
+            <button id="tab-S" data-tab="S">Sniper Scoped</button>
+          </div>
+
+          <div class="preview-stage" id="stage">
+            <canvas id="cv" width="440" height="440"></canvas>
+          </div>
+
+          <div class="preview-row">
+            <div class="bg-swatches" id="bgSwatches"></div>
+            <div class="zoom-row">
+              <span>ZOOM</span>
+              <input type="range" id="zoom" min="1" max="4" step="0.1" value="2">
+              <span id="zoomVal">2.0×</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+        <div class="panel-inner">
+          <div class="panel-title"><span class="tag">Export</span><h2>Import Code</h2></div>
+          <textarea class="codebox" id="codeOut" readonly></textarea>
+          <div class="btn-row">
+            <button class="btn" id="copyBtn">Copy Code</button>
+            <button class="btn ghost" id="loadBtn">Load Code Below ↴</button>
+            <button class="btn ghost" id="resetBtn">Reset to Default</button>
+          </div>
+          <textarea class="codebox" id="codeIn" style="margin-top:12px;" placeholder="Paste a Valorant crosshair import code here, then hit Load Code…"></textarea>
+          <div class="msg" id="msg"></div>
+        </div>
+      </div>
+
+      <div class="foot-note">
+        In Valorant: <b>Settings → Crosshair → Import Profile Code</b>, paste the code above, then Confirm.
+        Codes follow the community-reverse-engineered <b>0;P;…;A;…;S;…</b> schema (color <b>c/u</b>, outlines <b>h</b>, center dot <b>d/z</b>,
+        inner/outer lines prefixed <b>0</b>/<b>1</b> for show <b>b</b>, length <b>l</b>, thickness <b>t</b>, offset <b>o</b>, opacity <b>a</b>,
+        error toggles <b>f/m</b>, sniper scale <b>s</b>). This preview renders those exact values pixel-for-pixel — actual in-client
+        rendering may vary very slightly by resolution/aspect ratio.
+      </div>
+    </div>
+
+    <!-- RIGHT: CONTROLS -->
+    <div>
+      <div class="panel">
+        <div class="panel-inner" id="controls">
+          <div class="panel-title"><span class="tag" id="sectionTag">Primary</span><h2 id="sectionTitle">Crosshair Settings</h2></div>
+
+          <div id="advToggles" class="two-col" style="margin-bottom:4px;">
+            <div class="toggle-row"><label>Use Advanced (ADS)</label>
+              <span class="switch"><input type="checkbox" id="useADS"><span class="track"></span></span>
+            </div>
+            <div class="toggle-row"><label>Use Advanced (Sniper)</label>
+              <span class="switch"><input type="checkbox" id="useSniper"><span class="track"></span></span>
+            </div>
+          </div>
+
+          <div id="colorBlock">
+            <div class="subhead">Color</div>
+            <div class="color-row" id="colorSwatches"></div>
+            <div class="hex-row" id="hexRow" style="display:none;">
+              <input type="color" id="customColor" value="#ffffff">
+              <input type="text" id="customHex" value="FFFFFFFF" maxlength="8">
+            </div>
+            <div class="field" style="margin-top:12px;">
+              <div class="field-label"><label>Overall Opacity</label><span class="val" id="v_opacity">1.00</span></div>
+              <input type="range" id="opacity" min="0" max="1" step="0.01" value="1">
+            </div>
+          </div>
+
+          <div id="outlineBlock">
+            <div class="subhead">Outlines</div>
+            <div class="toggle-row"><label>Show Outlines</label>
+              <span class="switch"><input type="checkbox" id="outlines" checked><span class="track"></span></span>
+            </div>
+          </div>
+
+          <div id="dotBlock">
+            <div class="subhead">Center Dot</div>
+            <div class="toggle-row"><label>Show Center Dot</label>
+              <span class="switch"><input type="checkbox" id="dotShow"><span class="track"></span></span>
+            </div>
+            <div class="field" style="margin-top:10px;">
+              <div class="field-label"><label>Dot Thickness</label><span class="val" id="v_dotThick">2</span></div>
+              <input type="range" id="dotThick" min="1" max="6" step="1" value="2">
+            </div>
+            <div class="field" id="dotOpacityField">
+              <div class="field-label"><label>Dot Opacity</label><span class="val" id="v_dotOpacity">1.00</span></div>
+              <input type="range" id="dotOpacity" min="0" max="1" step="0.01" value="1">
+            </div>
+          </div>
+
+          <div id="errorBlock">
+            <div class="subhead">Error Behaviour</div>
+            <div class="toggle-row"><label>Fade w/ Firing Error</label>
+              <span class="switch"><input type="checkbox" id="fireErr"><span class="track"></span></span>
+            </div>
+            <div class="toggle-row"><label>Show Movement Error</label>
+              <span class="switch"><input type="checkbox" id="moveErr"><span class="track"></span></span>
+            </div>
+          </div>
+
+          <div id="linesBlock">
+            <div class="subhead">Inner Lines</div>
+            <div class="toggle-row"><label>Show Inner Lines</label>
+              <span class="switch"><input type="checkbox" id="in_show" checked><span class="track"></span></span>
+            </div>
+            <div class="two-col">
+              <div class="field"><div class="field-label"><label>Opacity</label><span class="val" id="v_in_opacity">1.00</span></div>
+                <input type="range" id="in_opacity" min="0" max="1" step="0.01" value="1"></div>
+              <div class="field"><div class="field-label"><label>Length</label><span class="val" id="v_in_length">6</span></div>
+                <input type="range" id="in_length" min="0" max="20" step="1" value="6"></div>
+              <div class="field"><div class="field-label"><label>Thickness</label><span class="val" id="v_in_thick">2</span></div>
+                <input type="range" id="in_thick" min="1" max="10" step="1" value="2"></div>
+              <div class="field"><div class="field-label"><label>Offset</label><span class="val" id="v_in_offset">3</span></div>
+                <input type="range" id="in_offset" min="0" max="20" step="1" value="3"></div>
+            </div>
+            <div class="two-col">
+              <div class="toggle-row"><label>Firing Error</label>
+                <span class="switch"><input type="checkbox" id="in_fire"><span class="track"></span></span></div>
+              <div class="toggle-row"><label>Movement Error</label>
+                <span class="switch"><input type="checkbox" id="in_move"><span class="track"></span></span></div>
+            </div>
+
+            <div class="subhead">Outer Lines</div>
+            <div class="toggle-row"><label>Show Outer Lines</label>
+              <span class="switch"><input type="checkbox" id="out_show"><span class="track"></span></span>
+            </div>
+            <div class="two-col">
+              <div class="field"><div class="field-label"><label>Opacity</label><span class="val" id="v_out_opacity">1.00</span></div>
+                <input type="range" id="out_opacity" min="0" max="1" step="0.01" value="1"></div>
+              <div class="field"><div class="field-label"><label>Length</label><span class="val" id="v_out_length">6</span></div>
+                <input type="range" id="out_length" min="0" max="20" step="1" value="6"></div>
+              <div class="field"><div class="field-label"><label>Thickness</label><span class="val" id="v_out_thick">2</span></div>
+                <input type="range" id="out_thick" min="1" max="10" step="1" value="2"></div>
+              <div class="field"><div class="field-label"><label>Offset</label><span class="val" id="v_out_offset">10</span></div>
+                <input type="range" id="out_offset" min="0" max="20" step="1" value="10"></div>
+            </div>
+            <div class="two-col">
+              <div class="toggle-row"><label>Firing Error</label>
+                <span class="switch"><input type="checkbox" id="out_fire"><span class="track"></span></span></div>
+              <div class="toggle-row"><label>Movement Error</label>
+                <span class="switch"><input type="checkbox" id="out_move"><span class="track"></span></span></div>
+            </div>
+          </div>
+
+          <div id="sniperScaleBlock" style="display:none;">
+            <div class="subhead">Sniper Scale</div>
+            <div class="field">
+              <div class="field-label"><label>Crosshair Scale</label><span class="val" id="v_snipeScale">1.00</span></div>
+              <input type="range" id="snipeScale" min="0.5" max="2.5" step="0.01" value="1">
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:18px;">
+        <div class="panel-inner">
+          <div class="panel-title"><span class="tag">Presets</span><h2>Known Pro Codes</h2></div>
+          <div class="preset-list" id="presetList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   DATA MODEL
+   One object per profile section (P / A / S). A/S are optional overlays.
+   ========================================================================= */
+const COLORS = [
+  {i:0, hex:'FFFFFFFF', name:'White'},
+  {i:1, hex:'00FF00FF', name:'Green'},
+  {i:2, hex:'7FFF00FF', name:'Yellow-Green'},
+  {i:3, hex:'FFFF00FF', name:'Yellow'},
+  {i:4, hex:'00FFFFFF', name:'Cyan'},
+  {i:5, hex:'FF00FFFF', name:'Pink'},
+  {i:6, hex:'FF0000FF', name:'Red'},
+  {i:7, hex:'F2F2F2FF', name:'White II'},
+];
+
+function defaultProfile(){
+  return {
+    colorIndex: 0,
+    customHex: 'FFFFFFFF',
+    opacity: 1,
+    outlines: true,
+    dotShow: false,
+    dotThick: 2,
+    dotOpacity: 1,
+    fireErr: false,
+    moveErr: false,
+    inner: { show:true, opacity:1, length:6, thick:2, offset:3, fire:false, move:false },
+    outer: { show:false, opacity:1, length:6, thick:2, offset:10, fire:false, move:false },
+    scale: 1
+  };
+}
+
+let state = {
+  useADS: false,
+  useSniper: false,
+  P: defaultProfile(),
+  A: defaultProfile(),
+  S: defaultProfile(),
+};
+let activeTab = 'P';
+
+/* =========================================================================
+   CODE GENERATION  (0;P;...;A;...;S;...)
+   ========================================================================= */
+function colorTokens(p){
+  const t = [];
+  if(p.colorIndex === 8){ t.push('c','8','u',p.customHex.toUpperCase()); }
+  else { t.push('c', String(p.colorIndex)); }
+  return t;
+}
+function num(n){
+  // trim trailing zeros, keep it short like real codes
+  return (Math.round(n*1000)/1000).toString();
+}
+function profileTokens(p, isSniper){
+  let t = [];
+  t = t.concat(colorTokens(p));
+  t.push('o', num(p.opacity));
+  t.push('h', p.outlines ? '1':'0');
+  t.push('d', p.dotShow ? '1':'0');
+  if(p.dotShow){
+    t.push('z', num(p.dotThick));
+    t.push('a', num(p.dotOpacity));
+  }
+  if(isSniper){
+    t.push('s', num(p.scale));
+    return t;
+  }
+  t.push('f', p.fireErr ? '1':'0');
+  t.push('m', p.moveErr ? '1':'0');
+  ['inner','outer'].forEach((key,idx)=>{
+    const g = p[key];
+    const pre = idx===0 ? '0':'1';
+    t.push(pre+'b', g.show ? '1':'0');
+    if(g.show){
+      t.push(pre+'l', num(g.length));
+      t.push(pre+'t', num(g.thick));
+      t.push(pre+'o', num(g.offset));
+      t.push(pre+'a', num(g.opacity));
+      t.push(pre+'f', g.fire ? '1':'0');
+      t.push(pre+'m', g.move ? '1':'0');
+    }
+  });
+  return t;
+}
+function generateCode(){
+  let out = ['0'];
+  out.push('P'); out = out.concat(profileTokens(state.P,false));
+  if(state.useADS){ out.push('A'); out = out.concat(profileTokens(state.A,false)); }
+  if(state.useSniper){ out.push('S'); out = out.concat(profileTokens(state.S,true)); }
+  return out.join(';');
+}
+
+/* =========================================================================
+   CODE PARSING (best-effort / tolerant of unknown or legacy keys)
+   ========================================================================= */
+function parseCode(code){
+  const toks = code.trim().split(';').map(s=>s.trim()).filter(s=>s.length);
+  if(!toks.length) return null;
+  if(toks[0] === '0') toks.shift();
+
+  const sections = {P:null, A:null, S:null};
+  let cur = 'P';
+  sections.P = {}; // raw kv store per section
+  let i = 0;
+  while(i < toks.length){
+    const tok = toks[i];
+    if(tok === 'P' || tok === 'A' || tok === 'S'){
+      cur = tok;
+      if(!sections[cur]) sections[cur] = {};
+      i++; continue;
+    }
+    // key, then value (unless next token is itself a section marker / another key with no value - be defensive)
+    const key = tok;
+    const value = (i+1 < toks.length) ? toks[i+1] : '1';
+    sections[cur][key] = value;
+    i += 2;
+  }
+
+  function toProfile(kv, isSniper){
+    if(!kv) return null;
+    const p = defaultProfile();
+    const getf = (k,d)=> (k in kv) ? parseFloat(kv[k]) : d;
+    const getb = (k,d)=> (k in kv) ? (kv[k]==='1') : d;
+
+    if('u' in kv){ p.colorIndex = 8; p.customHex = (kv['u']+'FFFFFFFF').slice(0,8).toUpperCase(); }
+    else if('c' in kv){ p.colorIndex = parseInt(kv['c'],10) || 0; if(p.colorIndex===8 && !('u' in kv)) p.customHex='FFFFFFFF'; }
+
+    p.opacity = getf('o', 1);
+    p.outlines = getb('h', p.outlines);
+    p.dotShow = getb('d', false);
+    p.dotThick = getf('z', 2);
+    p.dotOpacity = getf('a', 1);
+    p.fireErr = getb('f', false);
+    p.moveErr = getb('m', false);
+    p.scale = getf('s', 1);
+
+    ['0','1'].forEach(pre=>{
+      const g = pre==='0' ? p.inner : p.outer;
+      // show flag: prefer explicit b, else infer from presence of l/t/o/a, else legacy t-as-bool
+      if((pre+'b') in kv) g.show = kv[pre+'b']==='1';
+      else if((pre+'l') in kv || (pre+'o') in kv || (pre+'a') in kv) g.show = true;
+      g.length  = getf(pre+'l', g.length);
+      g.thick   = getf(pre+'t', g.thick);
+      g.offset  = getf(pre+'o', g.offset);
+      g.opacity = getf(pre+'a', g.opacity);
+      g.fire    = getb(pre+'f', g.fire);
+      g.move    = getb(pre+'m', g.move);
+    });
+    return p;
+  }
+
+  const P = toProfile(sections.P,false) || defaultProfile();
+  const A = sections.A ? toProfile(sections.A,false) : null;
+  const S = sections.S ? toProfile(sections.S,true) : null;
+
+  return {
+    useADS: !!A,
+    useSniper: !!S,
+    P, A: A || defaultProfile(), S: S || defaultProfile()
+  };
+}
+
+/* =========================================================================
+   CANVAS RENDERING — pixel-accurate to the model above
+   ========================================================================= */
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let zoom = 2.0;
+
+function hexToRgba(hex, alphaMul){
+  hex = hex.replace('#','');
+  if(hex.length===6) hex += 'FF';
+  const r = parseInt(hex.substr(0,2),16);
+  const g = parseInt(hex.substr(2,2),16);
+  const b = parseInt(hex.substr(4,2),16);
+  const a = (parseInt(hex.substr(6,2),16)/255) * alphaMul;
+  return `rgba(${r},${g},${b},${a.toFixed(3)})`;
+}
+function colorHexFor(p){
+  if(p.colorIndex === 8) return p.customHex;
+  const c = COLORS.find(c=>c.i===p.colorIndex) || COLORS[0];
+  return c.hex;
+}
+
+function drawLine(cx, cy, dx, dy, offset, length, thick, colorHex, opacity, outlines){
+  // dx,dy is unit direction. Draw a rectangle from `offset` to `offset+length` along that axis.
+  const ox = cx + dx*offset*zoom;
+  const oy = cy + dy*offset*zoom;
+  const len = length*zoom;
+  const th = Math.max(1, thick*zoom*0.85);
+
+  ctx.save();
+  ctx.translate(ox, oy);
+  const angle = Math.atan2(dy, dx);
+  ctx.rotate(angle);
+  // rectangle spans [0, len] along local x-axis, centered thickness on local y
+  if(outlines){
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(-1, -th/2 - 1.5, len + 2, th + 3);
+  }
+  ctx.fillStyle = hexToRgba(colorHex, opacity);
+  ctx.fillRect(0, -th/2, len, th);
+  ctx.restore();
+}
+
+function drawDot(cx, cy, thick, colorHex, opacity, outlines){
+  const size = Math.max(2, thick*zoom*0.9);
+  if(outlines){
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(cx - size/2 - 1.5, cy - size/2 - 1.5, size+3, size+3);
+  }
+  ctx.fillStyle = hexToRgba(colorHex, opacity);
+  ctx.fillRect(cx - size/2, cy - size/2, size, size);
+}
+
+function render(){
+  const w = cv.width, h = cv.height;
+  ctx.clearRect(0,0,w,h);
+  const cx = w/2, cy = h/2;
+
+  const p = state[activeTab];
+  const sc = (activeTab === 'S') ? p.scale : 1;
+  const colorHex = colorHexFor(p);
+
+  // sniper section only draws dot + outline ring by convention (scoped reticle)
+  if(activeTab === 'S'){
+    if(p.dotShow){
+      drawDot(cx, cy, p.dotThick*sc, colorHex, p.dotOpacity*p.opacity, p.outlines);
+    } else {
+      // fallback: faint center reference
+      drawDot(cx, cy, 1.4, colorHex, 0.55*p.opacity, false);
+    }
+    return;
+  }
+
+  const dirs = [ [1,0], [-1,0], [0,1], [0,-1] ];
+
+  if(p.outer.show){
+    dirs.forEach(([dx,dy])=>{
+      drawLine(cx, cy, dx, dy, p.outer.offset, p.outer.length, p.outer.thick, colorHex, p.outer.opacity*p.opacity, p.outlines);
+    });
+  }
+  if(p.inner.show){
+    dirs.forEach(([dx,dy])=>{
+      drawLine(cx, cy, dx, dy, p.inner.offset, p.inner.length, p.inner.thick, colorHex, p.inner.opacity*p.opacity, p.outlines);
+    });
+  }
+  if(p.dotShow){
+    drawDot(cx, cy, p.dotThick, colorHex, p.dotOpacity*p.opacity, p.outlines);
+  }
+}
+
+/* =========================================================================
+   BACKGROUNDS
+   ========================================================================= */
+const BACKGROUNDS = [
+  {name:'Black', css:'#1c1c1c'},
+  {name:'Charcoal', css:'#3a3a3a'},
+  {name:'Dust', css:'linear-gradient(180deg,#8f8264,#6b6247)'},
+  {name:'Haven Sky', css:'linear-gradient(180deg,#9fb6c4,#5f7a89)'},
+  {name:'Ascent Stone', css:'linear-gradient(180deg,#c9b79c,#8f7e64)'},
+  {name:'Split Neon', css:'linear-gradient(180deg,#241033,#160a20)'},
+  {name:'Icebox', css:'linear-gradient(180deg,#cfe4ef,#9ab6c4)'},
+];
+function buildBgSwatches(){
+  const wrap = document.getElementById('bgSwatches');
+  wrap.innerHTML = '';
+  BACKGROUNDS.forEach((b,idx)=>{
+    const btn = document.createElement('button');
+    btn.style.background = b.css;
+    btn.title = b.name;
+    if(idx===0) btn.classList.add('active');
+    btn.addEventListener('click', ()=>{
+      document.getElementById('stage').style.background = b.css;
+      [...wrap.children].forEach(c=>c.classList.remove('active'));
+      btn.classList.add('active');
+    });
+    wrap.appendChild(btn);
+  });
+  document.getElementById('stage').style.background = BACKGROUNDS[0].css;
+}
+
+/* =========================================================================
+   PRESETS (verified pro / community codes)
+   ========================================================================= */
+const PRESETS = [
+  {name:'TenZ', role:'Sentinels', color:'#ff00ff', code:'0;P;c;5;h;0;m;1;0l;4;0o;2;0a;1;1b;0;S;c;4;o;1'},
+  {name:'ScreaM', role:'KOI', color:'#ff00ff', code:'0;s;1;P;c;5;o;1;d;1;z;3;f;0;0t;6;0l;0;0a;1;0f;0;1b;0;S;c;6;s;0.949;o;1'},
+  {name:'Boaster', role:'Fnatic', color:'#00ff00', code:'0;s;1;P;c;1;o;1;d;1;0l;0;0o;2;0a;1;0f;0;1t;0;1l;0;1o;0;1a;0;S;c;1;o;1'},
+  {name:'Chronicle', role:'Fnatic', color:'#f2f2f2', code:'0;P;c;7;o;1;f;0;0t;1;0l;2;0o;2;0a;1;0f;0;1b;0'},
+  {name:'Jinggg', role:'Paper Rex', color:'#00ff00', code:'0;s;1;P;c;1;o;1;0t;1;0l;2;0o;2;0a;1;0f;0;1b;0;S;c;5'},
+  {name:'Shroud', role:'Streamer', color:'#f2f2f2', code:'0;P;o;0.506;d;1;z;1;0t;1;0l;4;0o;2;0a;1;0f;0;1b;0'},
+  {name:'nAts', role:'Team Liquid', color:'#00ff00', code:'0;P;c;1;o;1;0a;1;0l;2;0t;1;0o;2;0f;0;1b;0'},
+  {name:'Default', role:'Riot Games', color:'#00ff00', code:'0;s;1;P;c;1;o;1;u;FFFFFFFF;h;0;d;1;0l;4;0o;3;0a;1;1b;0'},
+];
+function buildPresetList(){
+  const wrap = document.getElementById('presetList');
+  wrap.innerHTML = '';
+  PRESETS.forEach(pr=>{
+    const el = document.createElement('div');
+    el.className = 'preset-item';
+    el.innerHTML = `<span class="dot" style="background:${pr.color}"></span><span class="nm">${pr.name}</span><span class="role">${pr.role}</span>`;
+    el.addEventListener('click', ()=>{
+      document.getElementById('codeIn').value = pr.code;
+      applyParsed(parseCode(pr.code));
+      setMsg(`Loaded ${pr.name}'s crosshair.`);
+    });
+    wrap.appendChild(el);
+  });
+}
+
+/* =========================================================================
+   UI BINDING
+   ========================================================================= */
+function buildColorSwatches(){
+  const wrap = document.getElementById('colorSwatches');
+  wrap.innerHTML = '';
+  COLORS.forEach(c=>{
+    const s = document.createElement('div');
+    s.className = 'swatch';
+    s.style.background = '#'+c.hex.slice(0,6);
+    s.title = c.name;
+    s.dataset.idx = c.i;
+    s.addEventListener('click', ()=>{
+      state[activeTab].colorIndex = c.i;
+      syncUIFromState(); pushCode();
+    });
+    wrap.appendChild(s);
+  });
+  const custom = document.createElement('div');
+  custom.className = 'swatch custom';
+  custom.title = 'Custom';
+  custom.dataset.idx = 8;
+  custom.addEventListener('click', ()=>{
+    state[activeTab].colorIndex = 8;
+    syncUIFromState(); pushCode();
+  });
+  wrap.appendChild(custom);
+}
+
+function setMsg(m){ document.getElementById('msg').textContent = m; }
+
+function bindings(){
+  const b = (id, evt, fn)=> document.getElementById(id).addEventListener(evt, fn);
+
+  document.getElementById('useADS').addEventListener('change', e=>{ state.useADS = e.target.checked; updateTabsEnabled(); pushCode(); });
+  document.getElementById('useSniper').addEventListener('change', e=>{ state.useSniper = e.target.checked; updateTabsEnabled(); pushCode(); });
+
+  b('customHex','input', e=>{
+    let v = e.target.value.toUpperCase().replace(/[^0-9A-F]/g,'').slice(0,8);
+    while(v.length<8) v += 'F';
+    state[activeTab].customHex = v;
+    document.getElementById('customColor').value = '#'+v.slice(0,6);
+    pushCode();
+  });
+  b('customColor','input', e=>{
+    const hex = e.target.value.replace('#','').toUpperCase();
+    const alpha = state[activeTab].customHex.slice(6,8) || 'FF';
+    state[activeTab].customHex = hex+alpha;
+    document.getElementById('customHex').value = hex+alpha;
+    pushCode();
+  });
+
+  const sliderMap = [
+    ['opacity','opacity',2], ['dotThick','dotThick',0], ['dotOpacity','dotOpacity',2],
+    ['in_opacity','inner.opacity',2], ['in_length','inner.length',0], ['in_thick','inner.thick',0], ['in_offset','inner.offset',0],
+    ['out_opacity','outer.opacity',2], ['out_length','outer.length',0], ['out_thick','outer.thick',0], ['out_offset','outer.offset',0],
+    ['snipeScale','scale',2],
+  ];
+  sliderMap.forEach(([id,path])=>{
+    document.getElementById(id).addEventListener('input', e=>{
+      setPath(state[activeTab], path, parseFloat(e.target.value));
+      updateValLabels();
+      pushCode();
+    });
+  });
+
+  const toggleMap = [
+    ['outlines','outlines'], ['dotShow','dotShow'], ['fireErr','fireErr'], ['moveErr','moveErr'],
+    ['in_show','inner.show'], ['in_fire','inner.fire'], ['in_move','inner.move'],
+    ['out_show','outer.show'], ['out_fire','outer.fire'], ['out_move','outer.move'],
+  ];
+  toggleMap.forEach(([id,path])=>{
+    document.getElementById(id).addEventListener('change', e=>{
+      setPath(state[activeTab], path, e.target.checked);
+      pushCode();
+    });
+  });
+
+  document.getElementById('zoom').addEventListener('input', e=>{
+    zoom = parseFloat(e.target.value);
+    document.getElementById('zoomVal').textContent = zoom.toFixed(1)+'×';
+    render();
+  });
+
+  ['tab-P','tab-A','tab-S'].forEach(id=>{
+    document.getElementById(id).addEventListener('click', ()=>{
+      const t = document.getElementById(id).dataset.tab;
+      if(t==='A' && !state.useADS) return;
+      if(t==='S' && !state.useSniper) return;
+      activeTab = t;
+      ['tab-P','tab-A','tab-S'].forEach(x=>document.getElementById(x).classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      syncUIFromState();
+      render();
+    });
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', ()=>{
+    const ta = document.getElementById('codeOut');
+    ta.select(); document.execCommand('copy');
+    setMsg('Copied to clipboard.');
+  });
+  document.getElementById('loadBtn').addEventListener('click', ()=>{
+    const raw = document.getElementById('codeIn').value;
+    if(!raw.trim()){ setMsg('Paste a code first.'); return; }
+    const parsed = parseCode(raw);
+    if(!parsed){ setMsg('Could not read that code.'); return; }
+    applyParsed(parsed);
+    setMsg('Code imported.');
+  });
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    state = { useADS:false, useSniper:false, P:defaultProfile(), A:defaultProfile(), S:defaultProfile() };
+    activeTab = 'P';
+    document.getElementById('codeIn').value='';
+    updateTabsEnabled();
+    ['tab-P','tab-A','tab-S'].forEach(x=>document.getElementById(x).classList.remove('active'));
+    document.getElementById('tab-P').classList.add('active');
+    syncUIFromState();
+    setMsg('Reset to default crosshair.');
+  });
+}
+
+function setPath(obj, path, val){
+  const parts = path.split('.');
+  let o = obj;
+  for(let i=0;i<parts.length-1;i++) o = o[parts[i]];
+  o[parts[parts.length-1]] = val;
+}
+function getPath(obj, path){
+  return path.split('.').reduce((o,k)=>o[k], obj);
+}
+
+function applyParsed(parsed){
+  state.useADS = parsed.useADS;
+  state.useSniper = parsed.useSniper;
+  state.P = parsed.P; state.A = parsed.A; state.S = parsed.S;
+  activeTab = 'P';
+  updateTabsEnabled();
+  ['tab-P','tab-A','tab-S'].forEach(x=>document.getElementById(x).classList.remove('active'));
+  document.getElementById('tab-P').classList.add('active');
+  document.getElementById('useADS').checked = state.useADS;
+  document.getElementById('useSniper').checked = state.useSniper;
+  syncUIFromState();
+  pushCode();
+}
+
+function updateTabsEnabled(){
+  document.getElementById('tab-A').disabled = !state.useADS;
+  document.getElementById('tab-S').disabled = !state.useSniper;
+  if(activeTab==='A' && !state.useADS) activeTab='P';
+  if(activeTab==='S' && !state.useSniper) activeTab='P';
+}
+
+function syncUIFromState(){
+  const p = state[activeTab];
+  const isSniper = activeTab === 'S';
+
+  document.getElementById('sectionTag').textContent = activeTab==='P'?'Primary':activeTab==='A'?'ADS':'Sniper';
+  document.getElementById('sectionTitle').textContent = isSniper ? 'Scoped Reticle' : 'Crosshair Settings';
+  document.getElementById('advToggles').style.display = activeTab==='P' ? 'grid' : 'none';
+
+  document.getElementById('linesBlock').style.display = isSniper ? 'none' : 'block';
+  document.getElementById('errorBlock').style.display = isSniper ? 'none' : 'block';
+  document.getElementById('sniperScaleBlock').style.display = isSniper ? 'block' : 'none';
+  document.getElementById('dotOpacityField').style.display = 'block';
+
+  // color swatches
+  [...document.getElementById('colorSwatches').children].forEach(el=>{
+    el.classList.toggle('active', parseInt(el.dataset.idx,10) === p.colorIndex);
+  });
+  document.getElementById('hexRow').style.display = (p.colorIndex===8) ? 'flex' : 'none';
+  document.getElementById('customHex').value = p.customHex;
+  document.getElementById('customColor').value = '#'+p.customHex.slice(0,6);
+
+  document.getElementById('opacity').value = p.opacity;
+  document.getElementById('outlines').checked = p.outlines;
+  document.getElementById('dotShow').checked = p.dotShow;
+  document.getElementById('dotThick').value = p.dotThick;
+  document.getElementById('dotOpacity').value = p.dotOpacity;
+  document.getElementById('fireErr').checked = p.fireErr;
+  document.getElementById('moveErr').checked = p.moveErr;
+
+  document.getElementById('in_show').checked = p.inner.show;
+  document.getElementById('in_opacity').value = p.inner.opacity;
+  document.getElementById('in_length').value = p.inner.length;
+  document.getElementById('in_thick').value = p.inner.thick;
+  document.getElementById('in_offset').value = p.inner.offset;
+  document.getElementById('in_fire').checked = p.inner.fire;
+  document.getElementById('in_move').checked = p.inner.move;
+
+  document.getElementById('out_show').checked = p.outer.show;
+  document.getElementById('out_opacity').value = p.outer.opacity;
+  document.getElementById('out_length').value = p.outer.length;
+  document.getElementById('out_thick').value = p.outer.thick;
+  document.getElementById('out_offset').value = p.outer.offset;
+  document.getElementById('out_fire').checked = p.outer.fire;
+  document.getElementById('out_move').checked = p.outer.move;
+
+  document.getElementById('snipeScale').value = p.scale;
+
+  updateValLabels();
+  render();
+}
+
+function updateValLabels(){
+  const p = state[activeTab];
+  document.getElementById('v_opacity').textContent = p.opacity.toFixed(2);
+  document.getElementById('v_dotThick').textContent = p.dotThick;
+  document.getElementById('v_dotOpacity').textContent = p.dotOpacity.toFixed(2);
+  document.getElementById('v_in_opacity').textContent = p.inner.opacity.toFixed(2);
+  document.getElementById('v_in_length').textContent = p.inner.length;
+  document.getElementById('v_in_thick').textContent = p.inner.thick;
+  document.getElementById('v_in_offset').textContent = p.inner.offset;
+  document.getElementById('v_out_opacity').textContent = p.outer.opacity.toFixed(2);
+  document.getElementById('v_out_length').textContent = p.outer.length;
+  document.getElementById('v_out_thick').textContent = p.outer.thick;
+  document.getElementById('v_out_offset').textContent = p.outer.offset;
+  document.getElementById('v_snipeScale').textContent = p.scale.toFixed(2);
+}
+
+function pushCode(){
+  document.getElementById('codeOut').value = generateCode();
+  render();
+}
+
+/* =========================================================================
+   INIT
+   ========================================================================= */
+buildColorSwatches();
+buildBgSwatches();
+buildPresetList();
+bindings();
+updateTabsEnabled();
+syncUIFromState();
+pushCode();
+</script>
+</body>
+</html>
