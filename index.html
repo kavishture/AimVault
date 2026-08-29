@@ -66,7 +66,13 @@
     background:#232323;
     border:1px solid var(--line);
   }
-  .preview-stage canvas{display:block;image-rendering:pixelated;}
+  .preview-stage canvas{display:block;image-rendering:pixelated;transform-origin:center center;}
+  .preview-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px;}
+  .zoom-tools{display:flex;align-items:center;gap:5px;}
+  .zoom-tools button{min-width:32px;height:30px;background:var(--ink-2);border:1px solid var(--line);color:var(--paper);font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;}
+  .zoom-tools button:hover{border-color:var(--red);}
+  .zoom-tools .zoom-value{min-width:62px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--teal);}
+  .zoom-range{width:150px!important;margin:0;}
   .bg-swatches{display:flex;gap:8px;margin:12px 0 4px;flex-wrap:wrap;}
   .bg-swatches button{
     width:30px;height:30px;border-radius:3px;border:2px solid transparent;cursor:pointer;padding:0;
@@ -222,8 +228,15 @@
             <canvas id="cv" width="440" height="440"></canvas>
           </div>
 
-          <div class="preview-row">
+          <div class="preview-tools">
             <div class="bg-swatches" id="bgSwatches"></div>
+            <div class="zoom-tools" aria-label="Preview zoom">
+              <button type="button" id="zoomOut" title="Zoom out">−</button>
+              <span class="zoom-value" id="zoomValue">100%</span>
+              <button type="button" id="zoomIn" title="Zoom in">+</button>
+              <button type="button" id="zoomReset" title="Reset preview zoom">Reset</button>
+              <input class="zoom-range" type="range" id="zoomRange" min="50" max="400" step="10" value="100" aria-label="Preview zoom">
+            </div>
           </div>
         </div>
       </div>
@@ -489,241 +502,248 @@ let state = {
 let activeTab = 'P';
 
 /* =========================================================================
-   CODE GENERATION  (0;P;...;A;...;S;...)
+   CODE GENERATION + PARSING
+   Valorant profile codes are semicolon-separated key/value pairs. The
+   advanced inner/outer keys are kept explicitly, including 0v/0g/1v/1g.
    ========================================================================= */
 function colorTokens(p){
-  const t = [];
-  if(p.colorIndex === 8){ t.push('c','8','u',p.customHex.toUpperCase()); }
-  else { t.push('c', String(p.colorIndex)); }
+  const t=[];
+  if(p.colorIndex===8){ t.push('c','8','u',p.customHex.toUpperCase(),'b','1'); }
+  else t.push('c',String(p.colorIndex));
   return t;
 }
 function num(n){
-  // trim trailing zeros, keep it short like real codes
-  return (Math.round(n*1000)/1000).toString();
+  if(!Number.isFinite(Number(n))) return '0';
+  return String(Math.round(Number(n)*1000)/1000);
 }
-function profileTokens(p, isSniper){
-  let t = [];
-  t = t.concat(colorTokens(p));
-  t.push('o', num(p.opacity));
-  t.push('h', p.outlines ? '1':'0');
-  t.push('t', num(p.outlineOpacity));
-  t.push('e', num(p.outlineThick));
-  t.push('d', p.dotShow ? '1':'0');
-  t.push('q', p.overrideFireOffset ? '1':'0');
-  if(p.dotShow){
-    t.push('z', num(p.dotThick));
-    t.push('a', num(p.dotOpacity));
-  }
+function profileTokens(p,isSniper){
+  const t=[];
+  t.push(...colorTokens(p));
+
+  // Global crosshair settings.
+  t.push('h',p.outlines?'1':'0');
+  t.push('o',num(p.outlineOpacity));
+  t.push('t',num(p.outlineThick));
+  t.push('d',p.dotShow?'1':'0');
+  if(p.dotShow){ t.push('a',num(p.dotOpacity),'z',num(p.dotThick)); }
+
   if(isSniper){
-    t.push('s', num(p.scale));
+    t.push('s',num(p.scale));
     return t;
   }
-  t.push('f', p.fireErr ? '1':'0');
-  t.push('m', p.moveErr ? '1':'0');
-  ['inner','outer'].forEach((key,idx)=>{
-    const g = p[key];
-    const pre = idx===0 ? '0':'1';
-    t.push(pre+'b', g.show ? '1':'0');
-    if(g.show){
-      t.push(pre+'l', num(g.length));
-      if(!g.linked){
-        t.push(pre+'v', num(g.lengthV));
-      }
-      t.push(pre+'t', num(g.thick));
-      t.push(pre+'o', num(g.offset));
-      t.push(pre+'a', num(g.opacity));
-      t.push(pre+'f', g.fire ? '1':'0');
-      t.push(pre+'m', g.move ? '1':'0');
-      t.push(pre+'M', num(g.moveMult));
-      t.push(pre+'F', num(g.fireMult));
+
+  // Fade with firing error / override firing error offset.
+  t.push('f',p.fireErr?'1':'0');
+  t.push('m',p.overrideFireOffset?'1':'0');
+
+  [['inner','0'],['outer','1']].forEach(([name,pre])=>{
+    const g=p[name];
+    t.push(pre+'b',g.show?'1':'0');
+    t.push(pre+'a',num(g.opacity));
+    t.push(pre+'l',num(g.lengthH));
+    t.push(pre+'t',num(g.thick));
+    t.push(pre+'o',num(g.offset));
+    t.push(pre+'m',g.move?'1':'0');
+    t.push(pre+'s',num(g.moveMult));
+    t.push(pre+'f',g.fire?'1':'0');
+    t.push(pre+'e',num(g.fireMult));
+    if(!g.linked){
+      t.push(pre+'g','1',pre+'v',num(g.lengthV));
     }
   });
   return t;
 }
 function generateCode(){
-  let out = ['0'];
-  out.push('P'); out = out.concat(profileTokens(state.P,false));
-  if(state.useADS){ out.push('A'); out = out.concat(profileTokens(state.A,false)); }
-  if(state.useSniper){ out.push('S'); out = out.concat(profileTokens(state.S,true)); }
+  let out=['0','P',...profileTokens(state.P,false)];
+  if(state.useADS) out.push('A',...profileTokens(state.A,false));
+  if(state.useSniper) out.push('S',...profileTokens(state.S,true));
   return out.join(';');
 }
 
-/* =========================================================================
-   CODE PARSING (best-effort / tolerant of unknown or legacy keys)
-   ========================================================================= */
+function isSectionToken(x){ return x==='P'||x==='A'||x==='S'; }
+function parsePairs(tokens){
+  const out={};
+  for(let i=0;i<tokens.length;i+=2){
+    const k=tokens[i];
+    if(!k) continue;
+    const v=(i+1<tokens.length && !isSectionToken(tokens[i+1])) ? tokens[i+1] : '1';
+    out[k]=v;
+    if(v!=='1' || i+1<tokens.length) { /* intentionally tolerant */ }
+  }
+  return out;
+}
 function parseCode(code){
-  const toks = code.trim().split(';').map(s=>s.trim()).filter(s=>s.length);
-  if(!toks.length) return null;
-  if(toks[0] === '0') toks.shift();
+  const clean=String(code||'').trim().replace(/\s+/g,'');
+  if(!clean) return null;
+  let toks=clean.split(';').filter(Boolean);
+  if(toks[0]==='0') toks.shift();
 
-  const sections = {P:null, A:null, S:null};
-  let cur = 'P';
-  sections.P = {}; // raw kv store per section
-  let i = 0;
-  while(i < toks.length){
-    const tok = toks[i];
-    if(tok === 'P' || tok === 'A' || tok === 'S'){
-      cur = tok;
-      if(!sections[cur]) sections[cur] = {};
-      i++; continue;
+  const sections={P:[],A:null,S:null};
+  const global=[];
+  let cur='P';
+  for(let i=0;i<toks.length;){
+    const tok=toks[i];
+    if(isSectionToken(tok)){
+      cur=tok;
+      if(!sections[cur]) sections[cur]=[];
+      i++;
+      continue;
     }
-    // key, then value (unless next token is itself a section marker / another key with no value - be defensive)
-    const key = tok;
-    const value = (i+1 < toks.length) ? toks[i+1] : '1';
-    sections[cur][key] = value;
-    i += 2;
+    const value=(i+1<toks.length && !isSectionToken(toks[i+1])) ? toks[i+1] : '1';
+    if(cur==='P' && sections.P.length===0 && tok==='s' && value==='1' && toks[i+2]==='P'){
+      // Global show-spectated flag in codes such as 0;s;1;P;...
+      global.push(tok,value);
+      i+=2;
+      continue;
+    }
+    sections[cur].push(tok,value);
+    i+=2;
   }
 
-  function toProfile(kv, isSniper){
-    if(!kv) return null;
-    const p = defaultProfile();
-    const getf = (k,d)=> (k in kv) ? parseFloat(kv[k]) : d;
-    const getb = (k,d)=> (k in kv) ? (kv[k]==='1') : d;
+  function toProfile(raw,isSniper){
+    const kv=parsePairs(raw||[]);
+    const p=defaultProfile();
+    const f=(k,d)=>Object.prototype.hasOwnProperty.call(kv,k) && Number.isFinite(parseFloat(kv[k])) ? parseFloat(kv[k]) : d;
+    const b=(k,d)=>Object.prototype.hasOwnProperty.call(kv,k) ? kv[k]==='1' : d;
 
-    if('u' in kv){ p.colorIndex = 8; p.customHex = (kv['u']+'FFFFFFFF').slice(0,8).toUpperCase(); }
-    else if('c' in kv){ p.colorIndex = parseInt(kv['c'],10) || 0; if(p.colorIndex===8 && !('u' in kv)) p.customHex='FFFFFFFF'; }
+    if('u' in kv){ p.colorIndex=8; p.customHex=(String(kv.u)+'FFFFFFFF').slice(0,8).toUpperCase(); }
+    else if('c' in kv){
+      const ci=parseInt(kv.c,10);
+      p.colorIndex=Number.isFinite(ci)?ci:0;
+      if(p.colorIndex===8) p.customHex='FFFFFFFF';
+    }
 
-    p.opacity = getf('o', 1);
-    p.outlines = getb('h', p.outlines);
-    p.outlineOpacity = getf('t', 0.5);
-    p.outlineThick = getf('e', 1);
-    p.overrideFireOffset = getb('q', false);
-    p.dotShow = getb('d', false);
-    p.dotThick = getf('z', 2);
-    p.dotOpacity = getf('a', 1);
-    p.fireErr = getb('f', false);
-    p.moveErr = getb('m', false);
-    p.scale = getf('s', 1);
+    // Canonical global keys.
+    p.outlines=b('h',p.outlines);
+    p.outlineOpacity=f('o',p.outlineOpacity);
+    p.outlineThick=f('t',p.outlineThick);
+    p.dotShow=b('d',p.dotShow);
+    p.dotOpacity=f('a',p.dotOpacity);
+    p.dotThick=f('z',p.dotThick);
+    p.fireErr=b('f',p.fireErr);
+    p.overrideFireOffset=b('m',p.overrideFireOffset);
+    p.scale=f('s',p.scale);
 
-    ['0','1'].forEach(pre=>{
-      const g = pre==='0' ? p.inner : p.outer;
-      // show flag: prefer explicit b, else infer from presence of l/t/o/a, else legacy t-as-bool
-      if((pre+'b') in kv) g.show = kv[pre+'b']==='1';
-      else if((pre+'l') in kv || (pre+'o') in kv || (pre+'a') in kv) g.show = true;
-      g.length  = getf(pre+'l', g.length);
-      g.lengthH = getf(pre+'l', g.length);
-      g.lengthV = getf(pre+'v', g.length);
-      g.linked = !(pre+'v' in kv);
-      g.thick   = getf(pre+'t', g.thick);
-      g.offset  = getf(pre+'o', g.offset);
-      g.opacity = getf(pre+'a', g.opacity);
-      g.fire    = getb(pre+'f', g.fire);
-      g.move    = getb(pre+'m', g.move);
-      g.moveMult = getf(pre+'M', g.moveMult);
-      g.fireMult = getf(pre+'F', g.fireMult);
-      // Secondary/asymmetric-axis keys some codes carry (v, g-link, s/e sub-scale)
-      // aren't separately modelled here — when present without a primary value
-      // they're used as a reasonable fallback so the shape still reads correctly.
-      if(!((pre+'t') in kv) && ((pre+'v') in kv)) g.thick = getf(pre+'v', g.thick);
+    // Backward compatibility with the older generator's private aliases.
+    if('q' in kv) p.overrideFireOffset=b('q',p.overrideFireOffset);
+    if('e' in kv && !('0e' in kv) && !('1e' in kv)) p.outlineThick=f('e',p.outlineThick);
+
+    if(isSniper) return p;
+
+    [['inner','0'],['outer','1']].forEach(([name,pre])=>{
+      const g=p[name];
+      g.show=b(pre+'b', name==='outer' ? true : g.show);
+      g.opacity=f(pre+'a',g.opacity);
+      g.lengthH=f(pre+'l',g.lengthH);
+      g.lengthV=f(pre+'v',g.lengthH);
+      g.thick=f(pre+'t',g.thick);
+      g.offset=f(pre+'o',g.offset);
+      g.move=b(pre+'m',g.move);
+      g.fire=b(pre+'f',g.fire);
+      g.moveMult=f(pre+'s',g.moveMult);
+      g.fireMult=f(pre+'e',g.fireMult);
+      // 0g/1g is the independent-length toggle. When it is absent, the
+      // game uses the normal linked horizontal/vertical length behaviour.
+      const independent=b(pre+'g',false);
+      g.linked=!independent;
+      if(g.linked) g.lengthV=g.lengthH;
+      g.length=g.lengthH;
     });
     return p;
   }
 
-  const P = toProfile(sections.P,false) || defaultProfile();
-  const A = sections.A ? toProfile(sections.A,false) : null;
-  const S = sections.S ? toProfile(sections.S,true) : null;
-
-  return {
-    useADS: !!A,
-    useSniper: !!S,
-    P, A: A || defaultProfile(), S: S || defaultProfile()
-  };
+  const P=toProfile(sections.P,false);
+  const A=sections.A ? toProfile(sections.A,false) : null;
+  const S=sections.S ? toProfile(sections.S,true) : null;
+  if(!P) return null;
+  return {useADS:!!A,useSniper:!!S,P,A:A||defaultProfile(),S:S||defaultProfile()};
 }
 
 /* =========================================================================
-   CANVAS RENDERING — pixel-accurate to the model above
+   CANVAS RENDERING
+   Preview zoom is visual-only. It never changes the generated Valorant code.
    ========================================================================= */
-const cv = document.getElementById('cv');
-const ctx = cv.getContext('2d');
-const zoom = 1.0; // locked 1:1 scale — 1 code unit = 1 canvas pixel
+const cv=document.getElementById('cv');
+const ctx=cv.getContext('2d');
+let previewZoom=1;
 
-function hexToRgba(hex, alphaMul){
-  hex = hex.replace('#','');
-  if(hex.length===6) hex += 'FF';
-  const r = parseInt(hex.substr(0,2),16);
-  const g = parseInt(hex.substr(2,2),16);
-  const b = parseInt(hex.substr(4,2),16);
-  const a = (parseInt(hex.substr(6,2),16)/255) * alphaMul;
+function hexToRgba(hex,alphaMul){
+  hex=String(hex||'FFFFFF').replace('#','');
+  if(hex.length===6) hex+='FF';
+  const r=parseInt(hex.substr(0,2),16)||255;
+  const g=parseInt(hex.substr(2,2),16)||255;
+  const b=parseInt(hex.substr(4,2),16)||255;
+  const a=((parseInt(hex.substr(6,2),16)||255)/255)*Math.max(0,Math.min(1,alphaMul));
   return `rgba(${r},${g},${b},${a.toFixed(3)})`;
 }
 function colorHexFor(p){
-  if(p.colorIndex === 8) return p.customHex;
-  const c = COLORS.find(c=>c.i===p.colorIndex) || COLORS[0];
-  return c.hex;
+  if(p.colorIndex===8) return p.customHex;
+  return (COLORS.find(c=>c.i===p.colorIndex)||COLORS[0]).hex;
 }
-
-function drawLine(cx, cy, dx, dy, offset, length, thick, colorHex, opacity, outlines, outlineOpacity, outlineThick){
-  // dx,dy is unit direction. Draw a rectangle from `offset` to `offset+length` along that axis.
-  const ox = cx + dx*offset*zoom;
-  const oy = cy + dy*offset*zoom;
-  const len = length*zoom;
-  const th = Math.max(1, thick*zoom*0.85);
-
+function drawLine(cx,cy,dx,dy,offset,length,thick,colorHex,opacity,outlines,outlineOpacity,outlineThick){
+  const z=previewZoom;
+  const ox=cx+dx*offset*z, oy=cy+dy*offset*z;
+  const len=Math.max(0,length)*z;
+  const th=Math.max(1,thick*z);
   ctx.save();
-  ctx.translate(ox, oy);
-  const angle = Math.atan2(dy, dx);
-  ctx.rotate(angle);
-  // rectangle spans [0, len] along local x-axis, centered thickness on local y
+  ctx.translate(ox,oy);
+  ctx.rotate(Math.atan2(dy,dx));
   if(outlines){
-    const oa = Math.max(0, Math.min(1, outlineOpacity));
-    const ot = Math.max(0, outlineThick);
-    ctx.fillStyle = `rgba(0,0,0,${oa})`;
-    ctx.fillRect(-ot, -th/2 - ot, len + ot*2, th + ot*2);
+    const oa=Math.max(0,Math.min(1,outlineOpacity));
+    const ot=Math.max(0,outlineThick*z);
+    ctx.fillStyle=`rgba(0,0,0,${oa})`;
+    ctx.fillRect(-ot,-th/2-ot,len+ot*2,th+ot*2);
   }
-  ctx.fillStyle = hexToRgba(colorHex, opacity);
-  ctx.fillRect(0, -th/2, len, th);
+  ctx.fillStyle=hexToRgba(colorHex,opacity);
+  ctx.fillRect(0,-th/2,len,th);
   ctx.restore();
 }
-
-function drawDot(cx, cy, thick, colorHex, opacity, outlines, outlineOpacity, outlineThick){
-  const size = Math.max(2, thick*zoom*0.9);
+function drawDot(cx,cy,thick,colorHex,opacity,outlines,outlineOpacity,outlineThick){
+  const size=Math.max(1,thick*previewZoom);
   if(outlines){
-    const oa = Math.max(0, Math.min(1, outlineOpacity));
-    const ot = Math.max(0, outlineThick);
-    ctx.fillStyle = `rgba(0,0,0,${oa})`;
-    ctx.fillRect(cx - size/2 - ot, cy - size/2 - ot, size+ot*2, size+ot*2);
+    const oa=Math.max(0,Math.min(1,outlineOpacity));
+    const ot=Math.max(0,outlineThick*previewZoom);
+    ctx.fillStyle=`rgba(0,0,0,${oa})`;
+    ctx.fillRect(cx-size/2-ot,cy-size/2-ot,size+ot*2,size+ot*2);
   }
-  ctx.fillStyle = hexToRgba(colorHex, opacity);
-  ctx.fillRect(cx - size/2, cy - size/2, size, size);
+  ctx.fillStyle=hexToRgba(colorHex,opacity);
+  ctx.fillRect(cx-size/2,cy-size/2,size,size);
 }
-
 function render(){
-  const w = cv.width, h = cv.height;
+  const w=cv.width,h=cv.height;
   ctx.clearRect(0,0,w,h);
-  const cx = w/2, cy = h/2;
+  ctx.imageSmoothingEnabled=false;
+  const cx=w/2,cy=h/2;
+  const p=state[activeTab];
+  const sc=activeTab==='S'?p.scale:1;
+  const colorHex=colorHexFor(p);
 
-  const p = state[activeTab];
-  const sc = (activeTab === 'S') ? p.scale : 1;
-  const colorHex = colorHexFor(p);
-
-  // sniper section only draws dot + outline ring by convention (scoped reticle)
-  if(activeTab === 'S'){
-    if(p.dotShow){
-      drawDot(cx, cy, p.dotThick*sc, colorHex, p.dotOpacity*p.opacity, p.outlines, p.outlineOpacity, p.outlineThick);
-    } else {
-      // fallback: faint center reference
-      drawDot(cx, cy, 1.4, colorHex, 0.55*p.opacity, false);
-    }
+  if(activeTab==='S'){
+    if(p.dotShow) drawDot(cx,cy,p.dotThick*sc,colorHex,p.dotOpacity,p.outlines,p.outlineOpacity,p.outlineThick);
+    else drawDot(cx,cy,1.4*sc,colorHex,0.55,false,0,0);
     return;
   }
 
-  const dirs = [ [1,0], [-1,0], [0,1], [0,-1] ];
-
-  if(p.outer.show){
+  const dirs=[[1,0],[-1,0],[0,1],[0,-1]];
+  const drawGroup=g=>{
+    if(!g.show) return;
     dirs.forEach(([dx,dy])=>{
-      const len = (dy===0 ? p.outer.lengthH : p.outer.lengthV);
-      drawLine(cx, cy, dx, dy, p.outer.offset, len, p.outer.thick, colorHex, p.outer.opacity*p.opacity, p.outlines, p.outlineOpacity, p.outlineThick);
+      const len=dy===0?g.lengthH:g.lengthV;
+      drawLine(cx,cy,dx,dy,g.offset,len,g.thick,colorHex,g.opacity*p.opacity,p.outlines,p.outlineOpacity,p.outlineThick);
     });
-  }
-  if(p.inner.show){
-    dirs.forEach(([dx,dy])=>{
-      const len = (dy===0 ? p.inner.lengthH : p.inner.lengthV);
-      drawLine(cx, cy, dx, dy, p.inner.offset, len, p.inner.thick, colorHex, p.inner.opacity*p.opacity, p.outlines, p.outlineOpacity, p.outlineThick);
-    });
-  }
-  if(p.dotShow){
-    drawDot(cx, cy, p.dotThick, colorHex, p.dotOpacity*p.opacity, p.outlines);
-  }
+  };
+  drawGroup(p.outer);
+  drawGroup(p.inner);
+  if(p.dotShow) drawDot(cx,cy,p.dotThick,colorHex,p.dotOpacity*p.opacity,p.outlines,p.outlineOpacity,p.outlineThick);
+}
+function setPreviewZoom(percent){
+  const clamped=Math.max(50,Math.min(400,Number(percent)||100));
+  previewZoom=clamped/100;
+  const range=document.getElementById('zoomRange');
+  const label=document.getElementById('zoomValue');
+  if(range) range.value=clamped;
+  if(label) label.textContent=clamped+'%';
+  render();
 }
 
 /* =========================================================================
@@ -928,6 +948,11 @@ function bindings(){
       pushCode();
     });
   });
+
+  b('zoomRange','input',e=>setPreviewZoom(e.target.value));
+  b('zoomOut','click',()=>setPreviewZoom((previewZoom*100)-10));
+  b('zoomIn','click',()=>setPreviewZoom((previewZoom*100)+10));
+  b('zoomReset','click',()=>setPreviewZoom(100));
 
   ['tab-P','tab-A','tab-S'].forEach(id=>{
     document.getElementById(id).addEventListener('click', ()=>{
