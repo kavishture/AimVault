@@ -76,15 +76,12 @@
   .arrow-btn:hover{color:var(--text);border-color:var(--text-dimmer);}
 
   /* ---- code box ---- */
-  .code-row{display:flex;gap:10px;align-items:flex-start;}
   textarea.code{
-    flex:1;min-height:58px;resize:vertical;background:var(--off-bg);border:1px solid var(--border);color:#6fe0d0;
+    width:100%;min-height:84px;resize:vertical;background:var(--off-bg);border:1px solid var(--border);color:#6fe0d0;
     font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 12px;line-height:1.5;border-radius:6px;word-break:break-all;
   }
-  textarea.code-in{
-    width:100%;min-height:58px;resize:vertical;background:var(--off-bg);border:1px solid var(--border);color:var(--text);
-    font-family:'JetBrains Mono',monospace;font-size:12px;padding:10px 12px;line-height:1.5;border-radius:6px;margin-top:10px;word-break:break-all;
-  }
+  textarea.code:focus{outline:none;border-color:var(--text-dimmer);}
+  .code-hint{font-size:11px;color:var(--text-dimmer);margin-top:6px;}
   .btn{
     font-family:'Inter',sans-serif;font-weight:600;font-size:12.5px;border:none;border-radius:6px;
     padding:10px 14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;
@@ -93,7 +90,7 @@
   .btn-red:hover{background:var(--red-hover);}
   .btn-dark{background:var(--off-bg);color:var(--text);border:1px solid var(--border);}
   .btn-dark:hover{border-color:var(--text-dimmer);}
-  .btn-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px;}
+  .btn-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
   .btn-full{width:100%;margin-top:8px;}
   .msg{font-size:11.5px;color:#6fe0d0;margin-top:8px;min-height:14px;}
 
@@ -105,17 +102,8 @@
   }
 
   /* ---- settings ---- */
-  .settings-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px;}
+  .settings-head{margin-bottom:14px;}
   .settings-head h1{font-size:20px;font-weight:800;margin:0;}
-  .mini-tabs{display:flex;gap:6px;}
-  .mini-tabs button{
-    font-family:'Inter',sans-serif;font-weight:600;font-size:11.5px;padding:7px 12px;border-radius:6px;
-    background:var(--off-bg);color:var(--text-dim);border:1px solid var(--border);cursor:pointer;
-  }
-  .mini-tabs button.active{background:var(--red-soft);color:#ff8f97;border-color:#4a1e26;}
-  .mini-tabs button:disabled{opacity:.35;cursor:not-allowed;}
-  .adv-toggles{display:flex;gap:14px;margin-bottom:14px;font-size:11.5px;color:var(--text-dim);flex-wrap:wrap;}
-  .adv-toggles label{display:flex;align-items:center;gap:6px;cursor:pointer;}
 
   .settings-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:start;}
   @media(max-width:1240px){.settings-grid{grid-template-columns:1fr;}}
@@ -164,24 +152,6 @@
 
   .subgroup{margin-top:4px;padding-top:12px;border-top:1px dashed var(--border-soft);}
 
-  /* ---- presets ---- */
-  .preset-list{display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;padding-right:4px;}
-  .preset-list::-webkit-scrollbar{width:6px;}
-  .preset-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-  .preset-item{
-    display:flex;align-items:center;gap:12px;background:var(--panel-2);border:1px solid var(--border-soft);
-    padding:10px 12px;border-radius:8px;
-  }
-  .preset-icon{width:26px;height:26px;flex:none;}
-  .preset-name{font-size:13px;font-weight:700;color:var(--text);}
-  .preset-role{font-size:11px;color:var(--text-dimmer);}
-  .preset-item .meta{flex:1;}
-  .preset-load{
-    background:var(--red);color:#fff;border:none;border-radius:6px;padding:7px 16px;font-size:11.5px;
-    font-weight:700;cursor:pointer;
-  }
-  .preset-load:hover{background:var(--red-hover);}
-
   .foot-note{font-size:11px;color:var(--text-dimmer);line-height:1.6;margin-top:6px;}
   ::selection{background:var(--red);color:#fff;}
 </style>
@@ -191,7 +161,7 @@
 
   <div class="top">
     <h1>Crosshair Generator</h1>
-    <p>Build a crosshair on the real Primary / ADS / Sniper parameters Valorant uses, preview it against a background, and export an import code — or paste one in to reverse it.</p>
+    <p>Build a crosshair on the real parameters Valorant uses, preview it against a background, and export an import code — or paste one straight into the code box to reverse it.</p>
   </div>
 
   <div class="layout">
@@ -213,17 +183,16 @@
 
       <div class="panel">
         <h2>Crosshair Code</h2>
-        <div class="code-row">
-          <textarea class="code" id="codeOut" readonly></textarea>
-          <button class="btn btn-red" id="copyBtn">⧉ Copy</button>
-        </div>
-        <div class="btn-row3">
-          <button class="btn btn-dark" id="pasteImportBtn">⇪ Paste &amp; Import</button>
+        <textarea class="code" id="codeBox" spellcheck="false"></textarea>
+        <div class="code-hint">Edit or paste a code here and click away (or press Enter) to import it.</div>
+        <div class="btn-row2">
+          <button class="btn btn-dark" id="copyBtn">⧉ Copy</button>
           <button class="btn btn-dark" id="randomizeBtn">⇄ Randomize</button>
-          <button class="btn btn-dark" id="shareBtn">⇗ Share URL</button>
         </div>
-        <button class="btn btn-red btn-full" id="exportBtn">⇩ Export</button>
-        <textarea class="code-in" id="codeIn" style="display:none;" placeholder="Paste a Valorant crosshair import code here…"></textarea>
+        <div class="btn-row2">
+          <button class="btn btn-dark" id="shareBtn">⇗ Share URL</button>
+          <button class="btn btn-red" id="exportBtn">⇩ Export</button>
+        </div>
         <div class="msg" id="msg"></div>
       </div>
 
@@ -235,25 +204,13 @@
       <div class="foot-note">
         In Valorant: <b>Settings → Crosshair → Import Profile Code</b>, paste the code above, then Confirm.
         "Show Spectator Crosshair" only affects how your crosshair looks to someone spectating you, so it isn't part of
-        the profile code and stays a local toggle here. "Override All Primary Crosshairs" forces ADS &amp; Sniper to
-        reuse the Primary profile — turn it off to configure those tabs separately.
+        the exported code and stays a local toggle here.
       </div>
     </div>
 
     <!-- RIGHT -->
     <div>
-      <div class="settings-head">
-        <h1>Settings</h1>
-        <div class="mini-tabs" id="weaponTabs">
-          <button id="tab-P" class="active" data-tab="P">Primary</button>
-          <button id="tab-A" data-tab="A">ADS</button>
-          <button id="tab-S" data-tab="S">Sniper</button>
-        </div>
-      </div>
-      <div class="adv-toggles" id="advToggles">
-        <label><input type="checkbox" id="useADS"> Use Advanced (ADS)</label>
-        <label><input type="checkbox" id="useSniper"> Use Advanced (Sniper)</label>
-      </div>
+      <div class="settings-head"><h1>Settings</h1></div>
 
       <div class="settings-grid">
         <!-- GENERAL -->
@@ -297,13 +254,10 @@
           <div class="toggle-field"><label>Fade Crosshair With Firing Error</label>
             <div class="seg2" id="seg-fireErr"><button data-v="0">Off</button><button data-v="1">On</button></div>
           </div>
-          <div class="toggle-field"><label>Override All Primary Crosshairs</label>
-            <div class="seg2" id="seg-overrideAllPrimary"><button data-v="0">Off</button><button data-v="1">On</button></div>
-          </div>
         </div>
 
         <!-- INNER LINES -->
-        <div class="panel" style="margin-bottom:16px;" id="innerPanel">
+        <div class="panel" style="margin-bottom:16px;">
           <h3>Inner Lines</h3>
           <div class="toggle-field"><label>Show Inner Lines</label>
             <div class="seg2" id="seg-in_show"><button data-v="0">Off</button><button data-v="1">On</button></div>
@@ -333,7 +287,7 @@
         </div>
 
         <!-- OUTER LINES -->
-        <div class="panel" style="margin-bottom:16px;" id="outerPanel">
+        <div class="panel" style="margin-bottom:16px;">
           <h3>Outer Lines</h3>
           <div class="toggle-field"><label>Show Outer Lines</label>
             <div class="seg2" id="seg-out_show"><button data-v="0">Off</button><button data-v="1">On</button></div>
@@ -362,17 +316,6 @@
             <input type="range" id="out_fireMult" min="0" max="5" step="0.01" value="1"></div>
         </div>
       </div>
-
-      <div class="panel" id="sniperScaleBlock" style="display:none;">
-        <h3>Sniper Scale</h3>
-        <div class="field"><div class="field-label"><label>Crosshair Scale</label><span class="val" id="v_snipeScale">1.00</span></div>
-          <input type="range" id="snipeScale" min="0.5" max="2.5" step="0.01" value="1"></div>
-      </div>
-
-      <div class="panel">
-        <h3>Presets</h3>
-        <div class="preset-list" id="presetList"></div>
-      </div>
     </div>
   </div>
 </div>
@@ -380,8 +323,7 @@
 <script>
 /* =========================================================================
    COLOR DATA — the 8 official Valorant crosshair colors (indices match the
-   real in-game "c" values used in import codes). The previous list skipped
-   "Green Yellow" and shifted colors 3-7, which is why they rendered wrong.
+   real in-game "c" values used in import codes).
    ========================================================================= */
 const COLORS = [
   {i:0, hex:'FFFFFFFF', name:'White'},
@@ -411,22 +353,13 @@ function defaultProfile(){
     moveErr: false,
     inner: { show:true, opacity:1, length:6, lengthH:6, lengthV:6, linked:true, thick:2, offset:3, fire:false, move:false, moveMult:1, fireMult:1 },
     outer: { show:false, opacity:1, length:6, lengthH:6, lengthV:6, linked:true, thick:2, offset:10, fire:false, move:false, moveMult:1, fireMult:1 },
-    scale: 1
   };
 }
 
-let state = {
-  useADS: false,
-  useSniper: false,
-  overrideAllPrimary: false,
-  P: defaultProfile(),
-  A: defaultProfile(),
-  S: defaultProfile(),
-};
-let activeTab = 'P';
+let state = { P: defaultProfile() };
 
 /* =========================================================================
-   CODE GENERATION  (0;P;...;A;...;S;...)
+   CODE GENERATION  (0;P;...)  — Primary profile only.
    showSpectator is a local-only convenience toggle (it affects how your
    crosshair looks to spectators, not your own profile), so it is
    intentionally left out of the exported code.
@@ -438,7 +371,7 @@ function colorTokens(p){
   return t;
 }
 function num(n){ return (Math.round(n*1000)/1000).toString(); }
-function profileTokens(p, isSniper){
+function profileTokens(p){
   let t = [];
   t = t.concat(colorTokens(p));
   t.push('o', num(p.opacity));
@@ -450,10 +383,6 @@ function profileTokens(p, isSniper){
   if(p.dotShow){
     t.push('z', num(p.dotThick));
     t.push('a', num(p.dotOpacity));
-  }
-  if(isSniper){
-    t.push('s', num(p.scale));
-    return t;
   }
   t.push('f', p.fireErr ? '1':'0');
   t.push('m', p.moveErr ? '1':'0');
@@ -476,24 +405,23 @@ function profileTokens(p, isSniper){
   return t;
 }
 function generateCode(){
-  let out = ['0'];
-  out.push('P'); out = out.concat(profileTokens(state.P,false));
-  if(state.useADS && !state.overrideAllPrimary){ out.push('A'); out = out.concat(profileTokens(state.A,false)); }
-  if(state.useSniper && !state.overrideAllPrimary){ out.push('S'); out = out.concat(profileTokens(state.S,true)); }
+  let out = ['0','P'];
+  out = out.concat(profileTokens(state.P));
   return out.join(';');
 }
 
 /* =========================================================================
-   CODE PARSING (best-effort / tolerant of unknown or legacy keys)
+   CODE PARSING (best-effort / tolerant of unknown or legacy keys).
+   Only the Primary ("P") section is used — any A/S sections in a pasted
+   code are ignored since this tool only edits a single profile.
    ========================================================================= */
 function parseCode(code){
   const toks = code.trim().split(';').map(s=>s.trim()).filter(s=>s.length);
   if(!toks.length) return null;
   if(toks[0] === '0') toks.shift();
 
-  const sections = {P:null, A:null, S:null};
+  const sections = {P:{}};
   let cur = 'P';
-  sections.P = {};
   let i = 0;
   while(i < toks.length){
     const tok = toks[i];
@@ -508,7 +436,7 @@ function parseCode(code){
     i += 2;
   }
 
-  function toProfile(kv, isSniper){
+  function toProfile(kv){
     if(!kv) return null;
     const p = defaultProfile();
     const getf = (k,d)=> (k in kv) ? parseFloat(kv[k]) : d;
@@ -527,7 +455,6 @@ function parseCode(code){
     p.dotOpacity = getf('a', 1);
     p.fireErr = getb('f', false);
     p.moveErr = getb('m', false);
-    p.scale = getf('s', 1);
 
     ['0','1'].forEach(pre=>{
       const g = pre==='0' ? p.inner : p.outer;
@@ -549,11 +476,8 @@ function parseCode(code){
     return p;
   }
 
-  const P = toProfile(sections.P,false) || defaultProfile();
-  const A = sections.A ? toProfile(sections.A,false) : null;
-  const S = sections.S ? toProfile(sections.S,true) : null;
-
-  return { useADS: !!A, useSniper: !!S, P, A: A || defaultProfile(), S: S || defaultProfile() };
+  const P = toProfile(sections.P) || defaultProfile();
+  return { P };
 }
 
 /* =========================================================================
@@ -609,17 +533,11 @@ function render(){
   const w = cv.width, h = cv.height;
   ctx.clearRect(0,0,w,h);
   const cx = w/2, cy = h/2;
-  const p = state[activeTab];
-  const sc = (activeTab === 'S') ? p.scale : 1;
-  let colorHex = colorHexFor(p);
+  const p = state.P;
+  const colorHex = colorHexFor(p);
   let overallOpacity = p.opacity;
   if(p.fireErr){ overallOpacity *= 0.6; } // preview-only cue for "fade with firing error"
 
-  if(activeTab === 'S'){
-    if(p.dotShow){ drawDot(cx, cy, p.dotThick*sc, colorHex, p.dotOpacity*overallOpacity, p.outlines, p.outlineOpacity, p.outlineThick); }
-    else { drawDot(cx, cy, 1.4, colorHex, 0.55*overallOpacity, false); }
-    return;
-  }
   const dirs = [ [1,0], [-1,0], [0,1], [0,-1] ];
   if(p.outer.show){
     dirs.forEach(([dx,dy])=>{
@@ -678,44 +596,6 @@ function buildBackgroundSelect(){
 }
 
 /* =========================================================================
-   PRESETS (verified pro / community codes)
-   ========================================================================= */
-const PRESETS = [
-  {name:'TenZ', role:'Sentinels', code:'0;P;c;5;h;0;m;1;0l;4;0o;2;0a;1;1b;0;S;c;4;o;1'},
-  {name:'ScreaM', role:'KOI', code:'0;s;1;P;c;5;o;1;d;1;z;3;f;0;0t;6;0l;0;0a;1;0f;0;1b;0;S;c;6;s;0.949;o;1'},
-  {name:'Boaster', role:'Fnatic', code:'0;s;1;P;c;1;o;1;d;1;0l;0;0o;2;0a;1;0f;0;1t;0;1l;0;1o;0;1a;0;S;c;1;o;1'},
-  {name:'Chronicle', role:'Fnatic', code:'0;P;c;7;o;1;f;0;0t;1;0l;2;0o;2;0a;1;0f;0;1b;0'},
-  {name:'Jinggg', role:'Paper Rex', code:'0;s;1;P;c;1;o;1;0t;1;0l;2;0o;2;0a;1;0f;0;1b;0;S;c;5'},
-  {name:'Shroud', role:'Streamer', code:'0;P;o;0.506;d;1;z;1;0t;1;0l;4;0o;2;0a;1;0f;0;1b;0'},
-  {name:'nAts', role:'Team Liquid', code:'0;P;c;1;o;1;0a;1;0l;2;0t;1;0o;2;0f;0;1b;0'},
-  {name:'Default', role:'Riot Games', code:'0;s;1;P;c;1;o;1;u;FFFFFFFF;h;0;d;1;0l;4;0o;3;0a;1;1b;0'},
-];
-function presetIconSvg(code){
-  const parsed = parseCode(code);
-  const hex = parsed ? '#'+colorHexFor(parsed.P).slice(0,6) : '#ffffff';
-  return `<svg width="26" height="26" viewBox="0 0 26 26"><g stroke="${hex}" stroke-width="2" stroke-linecap="square">
-    <line x1="13" y1="2" x2="13" y2="9"/><line x1="13" y1="17" x2="13" y2="24"/>
-    <line x1="2" y1="13" x2="9" y2="13"/><line x1="17" y1="13" x2="24" y2="13"/></g></svg>`;
-}
-function buildPresetList(){
-  const wrap = document.getElementById('presetList');
-  wrap.innerHTML = '';
-  PRESETS.forEach(pr=>{
-    const el = document.createElement('div');
-    el.className = 'preset-item';
-    el.innerHTML = `<span class="preset-icon">${presetIconSvg(pr.code)}</span>
-      <span class="meta"><div class="preset-name">${pr.name}</div><div class="preset-role">${pr.role}</div></span>
-      <button class="preset-load">Load</button>`;
-    el.querySelector('.preset-load').addEventListener('click', ()=>{
-      document.getElementById('codeIn').value = pr.code;
-      applyParsed(parseCode(pr.code));
-      setMsg(`Loaded ${pr.name}'s crosshair.`);
-    });
-    wrap.appendChild(el);
-  });
-}
-
-/* =========================================================================
    MATCHED STYLES (heuristic descriptive tags — not an official taxonomy)
    ========================================================================= */
 function computeTags(p){
@@ -736,7 +616,7 @@ function computeTags(p){
 function renderTags(){
   const wrap = document.getElementById('tagWrap');
   wrap.innerHTML = '';
-  computeTags(state[activeTab]).forEach(t=>{
+  computeTags(state.P).forEach(t=>{
     const el = document.createElement('span');
     el.className = 'tag'; el.textContent = t;
     wrap.appendChild(el);
@@ -767,30 +647,25 @@ function buildColorSelect(){
   custom.value = 8; custom.textContent = 'Custom';
   sel.appendChild(custom);
   sel.addEventListener('change', e=>{
-    state[activeTab].colorIndex = parseInt(e.target.value,10);
+    state.P.colorIndex = parseInt(e.target.value,10);
     syncUIFromState(); pushCode();
   });
 }
 
-/* Generic Off/On segmented toggle bound to a boolean path on the active profile,
-   or to a global path when isGlobal is true. */
-function bindSeg(id, path, isGlobal){
+function bindSeg(id, path){
   const wrap = document.getElementById('seg-'+id);
   const btns = [...wrap.children];
   btns.forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      const val = btn.dataset.v === '1';
-      if(isGlobal) setPath(state, path, val);
-      else setPath(state[activeTab], path, val);
-      syncSeg(id, path, isGlobal);
-      if(path==='overrideAllPrimary') updateTabsEnabled();
+      setPath(state.P, path, btn.dataset.v === '1');
+      syncSeg(id, path);
       pushCode();
     });
   });
 }
-function syncSeg(id, path, isGlobal){
+function syncSeg(id, path){
   const wrap = document.getElementById('seg-'+id);
-  const val = isGlobal ? getPath(state, path) : getPath(state[activeTab], path);
+  const val = getPath(state.P, path);
   [...wrap.children].forEach(btn=>{
     btn.classList.toggle('active', (btn.dataset.v === '1') === !!val);
   });
@@ -802,7 +677,6 @@ const SEGS = [
   ['in_show','inner.show'], ['in_move','inner.move'], ['in_fire','inner.fire'],
   ['out_show','outer.show'], ['out_move','outer.move'], ['out_fire','outer.fire'],
 ];
-const GLOBAL_SEGS = [ ['overrideAllPrimary','overrideAllPrimary'] ];
 
 const SLIDERS = [
   ['opacity','opacity',2], ['outlineOpacity','outlineOpacity',2], ['outlineThick','outlineThick',1],
@@ -811,7 +685,6 @@ const SLIDERS = [
   ['in_opacity','inner.opacity',2], ['in_moveMult','inner.moveMult',2], ['in_fireMult','inner.fireMult',2],
   ['out_length','outer.length',0], ['out_lengthV','outer.lengthV',0], ['out_thick','outer.thick',0], ['out_offset','outer.offset',0],
   ['out_opacity','outer.opacity',2], ['out_moveMult','outer.moveMult',2], ['out_fireMult','outer.fireMult',2],
-  ['snipeScale','scale',2],
 ];
 
 function bindings(){
@@ -820,36 +693,35 @@ function bindings(){
   document.getElementById('customHex').addEventListener('input', e=>{
     let v = e.target.value.toUpperCase().replace(/[^0-9A-F]/g,'').slice(0,8);
     while(v.length<8) v += 'F';
-    state[activeTab].customHex = v;
+    state.P.customHex = v;
     document.getElementById('customColor').value = '#'+v.slice(0,6);
     pushCode();
   });
   document.getElementById('customColor').addEventListener('input', e=>{
     const hex = e.target.value.replace('#','').toUpperCase();
-    const alpha = state[activeTab].customHex.slice(6,8) || 'FF';
-    state[activeTab].customHex = hex+alpha;
+    const alpha = state.P.customHex.slice(6,8) || 'FF';
+    state.P.customHex = hex+alpha;
     document.getElementById('customHex').value = hex+alpha;
     pushCode();
   });
 
   SLIDERS.forEach(([id,path])=>{
     document.getElementById(id).addEventListener('input', e=>{
-      setPath(state[activeTab], path, parseFloat(e.target.value));
+      setPath(state.P, path, parseFloat(e.target.value));
       const [section,key]=path.split('.');
-      if(key==='length' && state[activeTab][section] && state[activeTab][section].linked){
-        state[activeTab][section].lengthH = parseFloat(e.target.value);
-        state[activeTab][section].lengthV = parseFloat(e.target.value);
+      if(key==='length' && state.P[section] && state.P[section].linked){
+        state.P[section].lengthH = parseFloat(e.target.value);
+        state.P[section].lengthV = parseFloat(e.target.value);
       }
       updateValLabels(); pushCode();
     });
   });
 
-  SEGS.forEach(([id,path])=>bindSeg(id,path,false));
-  GLOBAL_SEGS.forEach(([id,path])=>bindSeg(id,path,true));
+  SEGS.forEach(([id,path])=>bindSeg(id,path));
 
   function bindLinked(section, checkboxId, fieldId){
     document.getElementById(checkboxId).addEventListener('change', e=>{
-      const g = state[activeTab][section];
+      const g = state.P[section];
       g.linked = e.target.checked;
       if(g.linked){ g.lengthV = g.lengthH = g.length; }
       document.getElementById(fieldId).style.display = g.linked ? 'none' : 'block';
@@ -859,26 +731,32 @@ function bindings(){
   bindLinked('inner','in_linked','in_lengthV_field');
   bindLinked('outer','out_linked','out_lengthV_field');
 
-  document.getElementById('useADS').addEventListener('change', e=>{ state.useADS = e.target.checked; updateTabsEnabled(); pushCode(); });
-  document.getElementById('useSniper').addEventListener('change', e=>{ state.useSniper = e.target.checked; updateTabsEnabled(); pushCode(); });
-
-  ['tab-P','tab-A','tab-S'].forEach(id=>{
-    document.getElementById(id).addEventListener('click', ()=>{
-      const t = document.getElementById(id).dataset.tab;
-      if(t==='A' && (!state.useADS || state.overrideAllPrimary)) return;
-      if(t==='S' && (!state.useSniper || state.overrideAllPrimary)) return;
-      activeTab = t;
-      ['tab-P','tab-A','tab-S'].forEach(x=>document.getElementById(x).classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      syncUIFromState();
-    });
+  /* Crosshair Code box doubles as import: editing it and clicking away
+     (or pressing Enter) parses and applies the code. */
+  const codeBox = document.getElementById('codeBox');
+  function tryImport(){
+    const raw = codeBox.value;
+    if(!raw.trim()){ pushCode(); return; }
+    const parsed = parseCode(raw);
+    if(!parsed){
+      setMsg('Could not read that code — reverted to the last valid one.');
+      pushCode();
+      return;
+    }
+    state.P = parsed.P;
+    syncUIFromState();
+    pushCode();
+    setMsg('Code imported.');
+  }
+  codeBox.addEventListener('blur', tryImport);
+  codeBox.addEventListener('keydown', e=>{
+    if(e.key === 'Enter'){ e.preventDefault(); codeBox.blur(); }
   });
 
   document.getElementById('copyBtn').addEventListener('click', ()=>{
-    const text = document.getElementById('codeOut').value;
+    const text = codeBox.value;
     const fail = ()=>{
-      const ta = document.getElementById('codeOut');
-      ta.removeAttribute('readonly'); ta.focus(); ta.select(); ta.setAttribute('readonly','');
+      codeBox.focus(); codeBox.select();
       setMsg('Clipboard blocked here — text is selected, press Ctrl/Cmd+C to copy.');
     };
     if(navigator.clipboard && navigator.clipboard.writeText){
@@ -886,35 +764,8 @@ function bindings(){
     } else { fail(); }
   });
 
-  document.getElementById('pasteImportBtn').addEventListener('click', ()=>{
-    const box = document.getElementById('codeIn');
-    box.style.display = box.style.display === 'none' ? 'block' : 'none';
-    if(box.style.display === 'block'){ box.focus(); setMsg('Paste a code below, then press Enter or click again to load.'); }
-  });
-  document.getElementById('codeIn').addEventListener('keydown', e=>{
-    if(e.key === 'Enter'){
-      e.preventDefault();
-      loadCodeFromInput();
-    }
-  });
-  document.getElementById('codeIn').addEventListener('blur', ()=>{
-    if(document.getElementById('codeIn').value.trim()) loadCodeFromInput();
-  });
-
-  function loadCodeFromInput(){
-    const raw = document.getElementById('codeIn').value;
-    if(!raw.trim()){ setMsg('Paste a code first.'); return; }
-    try{
-      const parsed = parseCode(raw);
-      if(!parsed){ setMsg('Could not read that code — check it starts with "0;".'); return; }
-      applyParsed(parsed);
-      setMsg('Code imported — showing Primary tab.');
-      document.getElementById('codeIn').style.display = 'none';
-    }catch(err){ setMsg("That code has a shape this reader doesn't recognize: " + err.message); }
-  }
-
   document.getElementById('randomizeBtn').addEventListener('click', ()=>{
-    const p = state[activeTab];
+    const p = state.P;
     p.colorIndex = Math.floor(Math.random()*COLORS.length);
     p.inner.length = Math.floor(Math.random()*10)+2;
     p.inner.lengthH = p.inner.lengthV = p.inner.length;
@@ -925,7 +776,7 @@ function bindings(){
     p.outer.lengthH = p.outer.lengthV = p.outer.length;
     p.dotShow = Math.random() > 0.5;
     syncUIFromState(); pushCode();
-    setMsg('Randomized the current profile.');
+    setMsg('Randomized the crosshair.');
   });
 
   document.getElementById('shareBtn').addEventListener('click', ()=>{
@@ -947,37 +798,8 @@ function bindings(){
   });
 }
 
-function applyParsed(parsed){
-  state.useADS = parsed.useADS;
-  state.useSniper = parsed.useSniper;
-  state.P = parsed.P; state.A = parsed.A; state.S = parsed.S;
-  activeTab = 'P';
-  updateTabsEnabled();
-  ['tab-P','tab-A','tab-S'].forEach(x=>document.getElementById(x).classList.remove('active'));
-  document.getElementById('tab-P').classList.add('active');
-  document.getElementById('useADS').checked = state.useADS;
-  document.getElementById('useSniper').checked = state.useSniper;
-  syncUIFromState();
-  pushCode();
-}
-
-function updateTabsEnabled(){
-  document.getElementById('tab-A').disabled = !state.useADS || state.overrideAllPrimary;
-  document.getElementById('tab-S').disabled = !state.useSniper || state.overrideAllPrimary;
-  document.getElementById('advToggles').style.display = state.overrideAllPrimary ? 'none' : 'flex';
-  if(activeTab==='A' && (!state.useADS || state.overrideAllPrimary)) activeTab='P';
-  if(activeTab==='S' && (!state.useSniper || state.overrideAllPrimary)) activeTab='P';
-  ['tab-P','tab-A','tab-S'].forEach(x=>document.getElementById(x).classList.remove('active'));
-  document.getElementById('tab-'+activeTab).classList.add('active');
-}
-
 function syncUIFromState(){
-  const p = state[activeTab];
-  const isSniper = activeTab === 'S';
-
-  document.getElementById('innerPanel').style.display = isSniper ? 'none' : 'block';
-  document.getElementById('outerPanel').style.display = isSniper ? 'none' : 'block';
-  document.getElementById('sniperScaleBlock').style.display = isSniper ? 'block' : 'none';
+  const p = state.P;
 
   document.getElementById('colorSelect').value = p.colorIndex;
   document.getElementById('swatchBox').style.background = '#'+colorHexFor(p).slice(0,6);
@@ -1011,10 +833,7 @@ function syncUIFromState(){
   document.getElementById('out_moveMult').value = p.outer.moveMult;
   document.getElementById('out_fireMult').value = p.outer.fireMult;
 
-  document.getElementById('snipeScale').value = p.scale;
-
-  SEGS.forEach(([id,path])=>syncSeg(id,path,false));
-  GLOBAL_SEGS.forEach(([id,path])=>syncSeg(id,path,true));
+  SEGS.forEach(([id,path])=>syncSeg(id,path));
 
   updateValLabels();
   renderTags();
@@ -1022,7 +841,7 @@ function syncUIFromState(){
 }
 
 function updateValLabels(){
-  const p = state[activeTab];
+  const p = state.P;
   document.getElementById('v_opacity').textContent = p.opacity.toFixed(2);
   document.getElementById('v_outlineOpacity').textContent = p.outlineOpacity.toFixed(2);
   document.getElementById('v_outlineThick').textContent = p.outlineThick;
@@ -1042,11 +861,13 @@ function updateValLabels(){
   document.getElementById('v_out_opacity').textContent = p.outer.opacity.toFixed(2);
   document.getElementById('v_out_moveMult').textContent = p.outer.moveMult.toFixed(2);
   document.getElementById('v_out_fireMult').textContent = p.outer.fireMult.toFixed(2);
-  document.getElementById('v_snipeScale').textContent = p.scale.toFixed(2);
 }
 
 function pushCode(){
-  document.getElementById('codeOut').value = generateCode();
+  const codeBox = document.getElementById('codeBox');
+  if(document.activeElement !== codeBox){
+    codeBox.value = generateCode();
+  }
   renderTags();
   render();
 }
@@ -1055,9 +876,7 @@ function pushCode(){
    INIT
    ========================================================================= */
 buildBackgroundSelect();
-buildPresetList();
 bindings();
-updateTabsEnabled();
 syncUIFromState();
 pushCode();
 </script>
